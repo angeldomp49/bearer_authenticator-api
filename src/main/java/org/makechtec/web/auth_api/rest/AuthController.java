@@ -7,7 +7,7 @@ import org.makechtec.software.caltentli.provider.SessionProvider;
 import org.makechtec.software.caltentli.provider.UserProvider;
 import org.makechtec.software.caltentli.user_auth.UserAuthRequest;
 import org.makechtec.software.caltentli.user_auth.UserAuthenticator;
-import org.makechtec.software.caltentli_mock.session_handling.UserSessionHandler;
+import org.makechtec.software.user_session_handler.session_handling.UserSessionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

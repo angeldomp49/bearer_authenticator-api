@@ -3,9 +3,10 @@ package org.makechtec.web.auth_api.config;
 import org.makechtec.software.caltentli.hashing.HashStrategy;
 import org.makechtec.software.caltentli.provider.SessionProvider;
 import org.makechtec.software.caltentli.provider.UserProvider;
-import org.makechtec.software.caltentli_mock.in_memory.InMemorySessionProvider;
-import org.makechtec.software.caltentli_mock.in_memory.InMemoryUserProvider;
-import org.makechtec.software.caltentli_mock.sha.SHAHash;
+import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.software.user_session_handler.hashing.SHAMask;
+import org.makechtec.software.user_session_handler.mapping.DBSessionMapper;
+import org.makechtec.software.user_session_handler.mapping.DBUserMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,17 +15,28 @@ public class ServiceProvider {
 
     @Bean
     public UserProvider userProvider(){
-        return new InMemoryUserProvider();
+        return new DBUserMapper(this.connectionInformation());
     }
 
     @Bean
     public SessionProvider sessionProvider(){
-        return new InMemorySessionProvider();
+        return new DBSessionMapper(this.connectionInformation());
     }
 
     @Bean
     public HashStrategy hashStrategy(){
-        return new SHAHash();
+        return new SHAMask();
+    }
+
+    @Bean
+    public ConnectionInformation connectionInformation(){
+        return new ConnectionInformation(
+                "makech",
+                "3nitrotoluenO@",
+                "localhost",
+                "3306",
+                "auth"
+        );
     }
 
 

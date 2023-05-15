@@ -19,7 +19,8 @@ dependencies {
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.makechtec.software:caltentli:1.0.0'
-	implementation 'org.makechtec.software:caltentli_mock:1.0.0'
+	implementation 'org.makechtec.software:user_session_handler:1.0.0'
+	implementation 'org.makechtec.software:sql_support:1.2.0'
 }
 
 tasks.named('test') {
