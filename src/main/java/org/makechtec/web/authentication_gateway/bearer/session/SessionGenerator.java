@@ -5,7 +5,7 @@ import java.util.Calendar;
 
 public class SessionGenerator {
 
-    public SessionInformation createForUser(String username){
+    public SessionInformation createForUser(String username) {
         return new SessionInformation(Calendar.getInstance(), false, 1, new ArrayList<>());
     }
 

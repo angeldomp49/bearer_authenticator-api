@@ -7,10 +7,10 @@ import org.makechtec.web.authentication_gateway.bearer.token.TokenBuilder;
 
 public class JWTTokenHandler {
 
-    private final SignaturePrinter signaturePrinter = new SignaturePrinter();
     public static final String SECRET_KEY = "secretKey";
+    private final SignaturePrinter signaturePrinter = new SignaturePrinter();
 
-    public String createTokenForSession(SessionInformation session){
+    public String createTokenForSession(SessionInformation session) {
 
         return TokenBuilder.builder()
                 .header(
@@ -30,7 +30,7 @@ public class JWTTokenHandler {
                 .build();
     }
 
-    public boolean isValidSignature(String token){
+    public boolean isValidSignature(String token) {
         var components = token.split("\\.");
 
         var message = components[0] + '.' + components[1] + '.' + SECRET_KEY;

@@ -17,12 +17,12 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.CREATED)
-    public String loginByUserRequest(@RequestParam("username") String username, @RequestParam("password") String password){
+    public String loginByUserRequest(@RequestParam("username") String username, @RequestParam("password") String password) {
 
 
         var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
 
-        if(!areValidCredentials){
+        if (!areValidCredentials) {
             return "error";
         }
 
@@ -34,7 +34,7 @@ public class AuthController {
 
     @GetMapping("/check")
     @ResponseStatus(HttpStatus.OK)
-    public String checkToken(@RequestHeader("Authorization") String authorization){
+    public String checkToken(@RequestHeader("Authorization") String authorization) {
         var token = authorization.replace("Basic ", "").trim();
         var isValidToken = bearerAuthenticationFactory.jwtTokenHandler().isValidSignature(token);
 
@@ -43,7 +43,7 @@ public class AuthController {
 
     @DeleteMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(@RequestHeader("Authorization") String authorization){
+    public void logout(@RequestHeader("Authorization") String authorization) {
 
         var token = authorization.replace("Basic ", "").trim();
 

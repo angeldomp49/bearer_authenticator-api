@@ -8,10 +8,10 @@ public class UserAuthenticator {
 
     private final UserProvider userProvider = new UserProvider();
 
-    public boolean areValidCredentials(String username, String password){
+    public boolean areValidCredentials(String username, String password) {
         var user = userProvider.byUsername(username);
 
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             return false;
         }
 
@@ -22,7 +22,6 @@ public class UserAuthenticator {
 
         return user.get().hashedPassword().equals(hashedPassword);
     }
-
 
 
 }

@@ -5,15 +5,15 @@ import org.makechtec.web.authentication_gateway.bearer.user.UserAuthenticator;
 
 public class BearerAuthenticationFactory {
 
-    public UserAuthenticator userAuthenticator(){
+    public UserAuthenticator userAuthenticator() {
         return new UserAuthenticator();
     }
 
-    public SessionGenerator sessionGenerator(){
+    public SessionGenerator sessionGenerator() {
         return new SessionGenerator();
     }
 
-    public JWTTokenHandler jwtTokenHandler(){
+    public JWTTokenHandler jwtTokenHandler() {
         return new JWTTokenHandler();
     }
 

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public class UserProvider {
 
-    Optional<User> byUsername(String username){
+    Optional<User> byUsername(String username) {
         return Optional.empty();
     }
 

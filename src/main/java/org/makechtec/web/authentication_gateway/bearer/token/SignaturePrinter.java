@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public class SignaturePrinter {
 
-    public String sign(String message){
+    public String sign(String message) {
         return
                 Hashing.sha256()
                         .hashString(message, StandardCharsets.UTF_8)
