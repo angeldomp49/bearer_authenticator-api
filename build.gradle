@@ -18,9 +18,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.makechtec.software:caltentli:1.0.0'
-	implementation 'org.makechtec.software:user_session_handler:1.0.0'
-	implementation 'org.makechtec.software:sql_support:1.2.0'
+	implementation 'com.google.guava:guava:30.1.1-jre'
+	implementation 'org.makechtec.software:sql_support:2.1.0'
+	implementation 'org.json:json:20231013'
+	implementation 'org.makechtec.software:json_tree:1.0.0'
 }
 
 tasks.named('test') {

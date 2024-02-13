@@ -1,4 +1,4 @@
-package org.makechtec.web.auth_api.rest;
+package org.makechtec.web.authentication_gateway.http.rest;
 
 public record LoggedResponse(boolean isLoggedIn, String message, String token) {
 }

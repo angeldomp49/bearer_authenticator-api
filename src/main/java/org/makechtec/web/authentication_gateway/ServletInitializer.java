@@ -1,4 +1,4 @@
-package org.makechtec.web.auth_api;
+package org.makechtec.web.authentication_gateway;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

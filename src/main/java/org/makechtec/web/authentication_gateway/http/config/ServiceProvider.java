@@ -1,4 +1,4 @@
-package org.makechtec.web.auth_api.config;
+package org.makechtec.web.authentication_gateway.http.config;
 
 import org.makechtec.software.caltentli.hashing.HashStrategy;
 import org.makechtec.software.caltentli.provider.SessionProvider;
