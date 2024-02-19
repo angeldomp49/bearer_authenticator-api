@@ -5,20 +5,17 @@ import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
-import org.makechtec.web.authentication_gateway.bearer.session.SessionGenerator;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionInformation;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
 import org.makechtec.web.authentication_gateway.bearer.token.TokenBuilder;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.logging.Logger;
 
 public class JWTTokenHandler {
 
-    private static final Logger LOG = Logger.getLogger(JWTTokenHandler.class.getName());
     public static final String SECRET_KEY = "secretKey";
+    private static final Logger LOG = Logger.getLogger(JWTTokenHandler.class.getName());
     private final SignaturePrinter signaturePrinter = new SignaturePrinter();
     private final ConnectionInformation connectionInformation;
 
@@ -59,8 +56,8 @@ public class JWTTokenHandler {
         var reformedSignature = signaturePrinter.sign(message);
         var reformedToken = components[0] + '.' + components[1] + '.' + reformedSignature;
 
-        System.out.println("old: "+token);
-        System.out.println("reformed: "+reformedToken);
+        System.out.println("old: " + token);
+        System.out.println("reformed: " + reformedToken);
 
         return reformedToken.equals(token);
     }
@@ -91,13 +88,13 @@ public class JWTTokenHandler {
     public void addToBlackList(String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             new PostgresEngine<Boolean>(connectionInformation)
-                        .queryString("""
-                                INSERT INTO atepoztli__authentication_service__schema.token_blacklist (token)
-                                VALUES(?);
-                                 """)
-                        .isPrepared()
-                        .addParamAtPosition(1, token, ParamType.TYPE_STRING)
-                        .update();
+                    .queryString("""
+                            INSERT INTO atepoztli__authentication_service__schema.token_blacklist (token)
+                            VALUES(?);
+                             """)
+                    .isPrepared()
+                    .addParamAtPosition(1, token, ParamType.TYPE_STRING)
+                    .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("There was a problem putting token in blacklist");

@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -90,7 +88,7 @@ public class AuthController {
                         .put("isValid", isValidToken)
                         .build();
 
-        return isValidToken? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
+        return isValidToken ? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
                 new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
