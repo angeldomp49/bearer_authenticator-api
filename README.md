@@ -29,3 +29,9 @@ These are the three allowed actions to use the API
 
 As you can see, the login receives username and associated password, for check and logout you may send the JWT token received in login response,
 once you send to logout endpoint the token is blacklisted and you cannot use it again.
+
+
+## CONFIGURATION ##
+
+Indeed, the database model is in another repository, but also you should to provide connection credentials in application.properties file,
+the application-example.properties is an example
