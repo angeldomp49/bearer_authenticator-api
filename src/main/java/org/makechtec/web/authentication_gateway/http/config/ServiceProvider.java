@@ -15,13 +15,19 @@ public class ServiceProvider {
 
     @Bean
     public ConnectionInformation connectionInformation() {
+        var authenticationConnectionInformation = this.authenticationConnectionInformation();
         return new ConnectionInformation(
-                "atepoztli__authentication_service__user",
-                "4e?7Ca-]4>k9~d_=@r?6",
-                "159.65.190.139",
-                "5433",
-                "tomcat_dev_database"
+                authenticationConnectionInformation.getUser(),
+                authenticationConnectionInformation.getPassword(),
+                authenticationConnectionInformation.getHostname(),
+                authenticationConnectionInformation.getPort(),
+                authenticationConnectionInformation.getDatabase()
         );
+    }
+
+    @Bean
+    public AuthenticationConnectionInformation authenticationConnectionInformation(){
+        return new AuthenticationConnectionInformation();
     }
 
 }
