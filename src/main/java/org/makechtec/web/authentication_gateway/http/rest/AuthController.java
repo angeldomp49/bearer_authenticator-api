@@ -53,7 +53,7 @@ public class AuthController {
                     ObjectLeaftBuilder.builder()
                             .put("message", "There was an error in the application")
                             .build();
-            e.printStackTrace();
+
             return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -77,7 +77,7 @@ public class AuthController {
                     ObjectLeaftBuilder.builder()
                             .put("message", "There was an error in the application")
                             .build();
-            e.printStackTrace();
+
             return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -100,11 +100,6 @@ public class AuthController {
         try {
             bearerAuthenticationFactory.jwtTokenHandler().addToBlackList(token);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("message", "There was an error in the application")
-                            .build();
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
