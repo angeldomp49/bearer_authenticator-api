@@ -1,0 +1,11 @@
+
+@hostname = http://localhost:8080
+
+### Login
+
+
+POST {{hostname}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=angeldomp49 &
+password=123

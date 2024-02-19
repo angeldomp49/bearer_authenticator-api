@@ -3,12 +3,17 @@ package org.makechtec.web.authentication_gateway.bearer.user;
 import com.google.common.hash.Hashing;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 
 public class UserAuthenticator {
 
-    private final UserProvider userProvider = new UserProvider();
+    private final UserProvider userProvider;
 
-    public boolean areValidCredentials(String username, String password) {
+    public UserAuthenticator(UserProvider userProvider) {
+        this.userProvider = userProvider;
+    }
+
+    public boolean areValidCredentials(String username, String password) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         var user = userProvider.byUsername(username);
 
         if (user.isEmpty()) {

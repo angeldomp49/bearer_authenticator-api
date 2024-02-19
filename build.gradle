@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.makechtec.web'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = '17'
 
 repositories {
@@ -21,7 +21,7 @@ dependencies {
     implementation 'com.google.guava:guava:30.1.1-jre'
     implementation 'org.makechtec.software:sql_support:2.1.0'
     implementation 'org.json:json:20231013'
-    implementation 'org.makechtec.software:json_tree:1.0.0'
+    implementation 'org.makechtec.software:json_tree:2.0.0'
 }
 
 tasks.named('test') {

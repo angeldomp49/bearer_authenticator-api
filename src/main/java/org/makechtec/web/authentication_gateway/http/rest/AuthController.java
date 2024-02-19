@@ -1,10 +1,16 @@
 package org.makechtec.web.authentication_gateway.http.rest;
 
 
+import org.makechtec.software.json_tree.ObjectLeaf;
+import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,44 +18,96 @@ import java.util.List;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final BearerAuthenticationFactory bearerAuthenticationFactory = new BearerAuthenticationFactory();
+    private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final List<String> blackList = new ArrayList<>();
 
+    @Autowired
+    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory) {
+        this.bearerAuthenticationFactory = bearerAuthenticationFactory;
+    }
+
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.CREATED)
-    public String loginByUserRequest(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public ResponseEntity<String> loginByUserRequest(@RequestParam("username") String username, @RequestParam("password") String password) {
 
+        try {
+            var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
 
-        var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
+            if (!areValidCredentials) {
+                var message =
+                        ObjectLeaftBuilder.builder()
+                                .put("message", "Username or password are invalid")
+                                .build();
 
-        if (!areValidCredentials) {
-            return "error";
+                return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+            }
+
+            var session = bearerAuthenticationFactory.sessionGenerator().createForUser(username);
+            var token = bearerAuthenticationFactory.jwtTokenHandler().createTokenForSession(session);
+
+            var message =
+                    ObjectLeaftBuilder.builder()
+                            .put("token", token)
+                            .build();
+
+            return new ResponseEntity<>(createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
+
+        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            var message =
+                    ObjectLeaftBuilder.builder()
+                            .put("message", "There was an error in the application")
+                            .build();
+            e.printStackTrace();
+            return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        var session = bearerAuthenticationFactory.sessionGenerator().createForUser(username);
-
-        return bearerAuthenticationFactory.jwtTokenHandler().createTokenForSession(session);
 
     }
 
     @GetMapping("/check")
-    @ResponseStatus(HttpStatus.OK)
-    public String checkToken(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<String> checkToken(@RequestHeader("Authorization") String authorization) {
         var token = authorization.replace("Basic ", "").trim();
+
+        if (blackList.stream().anyMatch(token::equals)) {
+            var message =
+                    ObjectLeaftBuilder.builder()
+                            .put("isValid", false)
+                            .build();
+
+            return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
+        }
+
         var isValidToken = bearerAuthenticationFactory.jwtTokenHandler().isValidSignature(token);
 
-        return "isValid: " + isValidToken;
+        var message =
+                ObjectLeaftBuilder.builder()
+                        .put("isValid", isValidToken)
+                        .build();
+
+        return new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK);
     }
 
     @DeleteMapping("/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
 
         var token = authorization.replace("Basic ", "").trim();
 
         blackList.add(token);
 
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    private String createResponse(ObjectLeaf content, HttpStatus status) {
+        return
+                ObjectLeaftBuilder.builder()
+                        .put("statusCode", status.value())
+                        .put("body",
+                                ObjectLeaftBuilder.builder()
+                                        .put("data",
+                                                content
+                                        )
+                                        .build()
+                        )
+                        .build()
+                        .getLeafValue();
+    }
 
 }

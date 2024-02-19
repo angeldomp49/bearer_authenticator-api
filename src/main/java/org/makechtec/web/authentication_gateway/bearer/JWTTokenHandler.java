@@ -1,5 +1,6 @@
 package org.makechtec.web.authentication_gateway.bearer;
 
+import org.makechtec.software.json_tree.builders.ArrayStringLeafBuilder;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionInformation;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
@@ -11,6 +12,10 @@ public class JWTTokenHandler {
     private final SignaturePrinter signaturePrinter = new SignaturePrinter();
 
     public String createTokenForSession(SessionInformation session) {
+
+        var permissionsSet = ArrayStringLeafBuilder.builder();
+
+        session.permissions().forEach(permissionsSet::add);
 
         return TokenBuilder.builder()
                 .header(
@@ -24,6 +29,7 @@ public class JWTTokenHandler {
                                 .put("exp", session.expirationDate().getTimeInMillis())
                                 .put("uid", session.userId())
                                 .put("isClosed", session.isClosed())
+                                .put("permissions", permissionsSet.build())
                                 .build()
                 )
                 .sign(SECRET_KEY)
