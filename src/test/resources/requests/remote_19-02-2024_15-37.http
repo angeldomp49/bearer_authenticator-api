@@ -1,0 +1,21 @@
+@hostname = http://159.65.190.139:9080/auth-api
+
+### POST Login
+POST {{hostname}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username = angeldomp49 &
+password = 123
+###
+
+### GET Check
+GET {{hostname}}/auth/check
+Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsiYWxsIGFwaXMiXSwiZXhwIjoxNzEwOTcyNzczMzc3fQ==.4b4755bf7edc89192a03f1d7152ea25c7f47aa8a883b3fbcc31b7281d735beac
+###
+
+### DELETE Logout
+DELETE {{hostname}}/auth/logout
+Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsInNob3cgb3duIGJpbGxzIiwid3JpdGUiLCJlZGl0IG93biBwcm9maWxlIl0sImV4cCI6MTcxMDk2NjE3MDMxN30=.d002fdd4bfae5c9ffbf762c8d6928ce20ef8422af94c695376d27975c73cc560
+###
+
+### eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsiYWxsIGFwaXMiXSwiZXhwIjoxNzEwOTcyNzczMzc3fQ==.4b4755bf7edc89192a03f1d7152ea25c7f47aa8a883b3fbcc31b7281d735beac
