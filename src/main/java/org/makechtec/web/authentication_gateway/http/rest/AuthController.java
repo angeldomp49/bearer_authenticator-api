@@ -19,7 +19,6 @@ import java.util.List;
 public class AuthController {
 
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
-    private final List<String> blackList = new ArrayList<>();
 
     @Autowired
     public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory) {
@@ -64,15 +63,24 @@ public class AuthController {
 
     @GetMapping("/check")
     public ResponseEntity<String> checkToken(@RequestHeader("Authorization") String authorization) {
-        var token = authorization.replace("Basic ", "").trim();
+        var token = authorization.replace("Bearer ", "").trim();
 
-        if (blackList.stream().anyMatch(token::equals)) {
+        try {
+            if (bearerAuthenticationFactory.jwtTokenHandler().isInBlackList(token)) {
+                var message =
+                        ObjectLeaftBuilder.builder()
+                                .put("isValid", false)
+                                .build();
+
+                return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
+            }
+        } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             var message =
                     ObjectLeaftBuilder.builder()
-                            .put("isValid", false)
+                            .put("message", "There was an error in the application")
                             .build();
-
-            return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
+            e.printStackTrace();
+            return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         var isValidToken = bearerAuthenticationFactory.jwtTokenHandler().isValidSignature(token);
@@ -82,15 +90,25 @@ public class AuthController {
                         .put("isValid", isValidToken)
                         .build();
 
-        return new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK);
+        return isValidToken? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
+                new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
 
-        var token = authorization.replace("Basic ", "").trim();
+        var token = authorization.replace("Bearer ", "").trim();
 
-        blackList.add(token);
+        try {
+            bearerAuthenticationFactory.jwtTokenHandler().addToBlackList(token);
+        } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            var message =
+                    ObjectLeaftBuilder.builder()
+                            .put("message", "There was an error in the application")
+                            .build();
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

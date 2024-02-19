@@ -24,7 +24,7 @@ public class BearerAuthenticationFactory {
     }
 
     public JWTTokenHandler jwtTokenHandler() {
-        return new JWTTokenHandler();
+        return new JWTTokenHandler(connectionInformation);
     }
 
 }
