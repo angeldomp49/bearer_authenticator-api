@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -55,7 +53,7 @@ public class AuthController {
                     ObjectLeaftBuilder.builder()
                             .put("message", "There was an error in the application")
                             .build();
-            e.printStackTrace();
+
             return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -79,7 +77,7 @@ public class AuthController {
                     ObjectLeaftBuilder.builder()
                             .put("message", "There was an error in the application")
                             .build();
-            e.printStackTrace();
+
             return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -90,7 +88,7 @@ public class AuthController {
                         .put("isValid", isValidToken)
                         .build();
 
-        return isValidToken? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
+        return isValidToken ? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
                 new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
@@ -102,11 +100,6 @@ public class AuthController {
         try {
             bearerAuthenticationFactory.jwtTokenHandler().addToBlackList(token);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("message", "There was an error in the application")
-                            .build();
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
