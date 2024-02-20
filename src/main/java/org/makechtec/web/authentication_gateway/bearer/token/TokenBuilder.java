@@ -6,16 +6,17 @@ import java.util.Base64;
 
 public class TokenBuilder {
 
-    private final SignaturePrinter signaturePrinter = new SignaturePrinter();
+    private final SignaturePrinter signaturePrinter;
     private String encodedHeader;
     private String encodedPayload;
     private String signature;
 
-    private TokenBuilder() {
+    private TokenBuilder(SignaturePrinter signaturePrinter) {
+        this.signaturePrinter = signaturePrinter;
     }
 
-    public static TokenBuilder builder() {
-        return new TokenBuilder();
+    public static TokenBuilder builder(SignaturePrinter signaturePrinter) {
+        return new TokenBuilder(signaturePrinter);
     }
 
     public TokenBuilder header(ObjectLeaf header) {
@@ -28,9 +29,9 @@ public class TokenBuilder {
         return this;
     }
 
-    public TokenBuilder sign(String secretKey) {
+    public TokenBuilder sign() {
 
-        var message = this.encodedHeader + '.' + this.encodedPayload + '.' + secretKey;
+        var message = this.encodedHeader + '.' + this.encodedPayload;
 
         this.signature = signaturePrinter.sign(message);
 

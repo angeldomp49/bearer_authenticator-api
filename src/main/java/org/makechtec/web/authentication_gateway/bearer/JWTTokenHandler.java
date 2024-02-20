@@ -14,12 +14,12 @@ import java.util.logging.Logger;
 
 public class JWTTokenHandler {
 
-    public static final String SECRET_KEY = "secretKey";
     private static final Logger LOG = Logger.getLogger(JWTTokenHandler.class.getName());
-    private final SignaturePrinter signaturePrinter = new SignaturePrinter();
+    private final SignaturePrinter signaturePrinter;
     private final ConnectionInformation connectionInformation;
 
-    public JWTTokenHandler(ConnectionInformation connectionInformation) {
+    public JWTTokenHandler(ConnectionInformation connectionInformation, SignaturePrinter signaturePrinter) {
+        this.signaturePrinter = signaturePrinter;
         this.connectionInformation = connectionInformation;
     }
 
@@ -29,7 +29,7 @@ public class JWTTokenHandler {
 
         session.permissions().forEach(permissionsSet::add);
 
-        return TokenBuilder.builder()
+        return TokenBuilder.builder(this.signaturePrinter)
                 .header(
                         ObjectLeaftBuilder.builder()
                                 .put("alg", "SHA256")
@@ -44,14 +44,14 @@ public class JWTTokenHandler {
                                 .put("permissions", permissionsSet.build())
                                 .build()
                 )
-                .sign(SECRET_KEY)
+                .sign()
                 .build();
     }
 
     public boolean isValidSignature(String token) {
         var components = token.split("\\.");
 
-        var message = components[0] + '.' + components[1] + '.' + SECRET_KEY;
+        var message = components[0] + '.' + components[1];
 
         var reformedSignature = signaturePrinter.sign(message);
         var reformedToken = components[0] + '.' + components[1] + '.' + reformedSignature;
