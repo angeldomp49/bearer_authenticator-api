@@ -19,16 +19,37 @@ These are the three allowed actions to use the API
     
     ### GET Check
     GET {{hostname}}/auth/check
-    Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsInNob3cgb3duIGJpbGxzIiwid3JpdGUiLCJlZGl0IG93biBwcm9maWxlIl0sImV4cCI6MTcxMDk2NjE3MDMxN30=.d002fdd4bfae5c9ffbf762c8d6928ce20ef8422af94c695376d27975c73cc560
+    Authorization: Bearer {{token}}
     ###
     
     ### DELETE Logout
     DELETE {{hostname}}/auth/logout
-    Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsInNob3cgb3duIGJpbGxzIiwid3JpdGUiLCJlZGl0IG93biBwcm9maWxlIl0sImV4cCI6MTcxMDk2NjE3MDMxN30=.d002fdd4bfae5c9ffbf762c8d6928ce20ef8422af94c695376d27975c73cc560
+    Authorization: Bearer {{token}}
+    ###
+
+    ### POST register
+    POST {{hostname}}/user
+    Authorization: Bearer {{token}}
+    Content-Type: application/x-www-form-urlencoded
+    
+    username = angel &
+    email = angeldomp49@gmail.com &
+    password = yupi2
     ###
 
 As you can see, the login receives username and associated password, for check and logout you may send the JWT token received in login response,
 once you send to logout endpoint the token is blacklisted and you cannot use it again.
+
+For login this is the expected response:
+
+    {
+        "statusCode": 200,
+        "body": {
+            "data": {
+                "token": //jwt token used to get authenticated for example in registration or check
+            }
+        }
+    }
 
 
 ## CONFIGURATION ##
