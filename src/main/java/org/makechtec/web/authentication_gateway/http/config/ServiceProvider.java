@@ -1,7 +1,10 @@
 package org.makechtec.web.authentication_gateway.http.config;
 
 import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
+import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
+import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,7 +13,10 @@ public class ServiceProvider {
 
     @Bean
     public BearerAuthenticationFactory bearerAuthenticationFactory() {
-        return new BearerAuthenticationFactory(connectionInformation());
+        return new BearerAuthenticationFactory(
+                connectionInformation(),
+                new SignaturePrinter(this.crypographyInformation().getSecretKey()),
+                passwordHasher());
     }
 
     @Bean
@@ -26,8 +32,23 @@ public class ServiceProvider {
     }
 
     @Bean
+    public PasswordHasher passwordHasher(){
+        return new PasswordHasher(crypographyInformation());
+    }
+
+    @Bean
+    public UserDBConnection userDBConnection(){
+        return new UserDBConnection(connectionInformation());
+    }
+
+    @Bean
     public AuthenticationConnectionInformation authenticationConnectionInformation(){
         return new AuthenticationConnectionInformation();
+    }
+
+    @Bean
+    public CrypographyInformation crypographyInformation(){
+        return new CrypographyInformation();
     }
 
 }

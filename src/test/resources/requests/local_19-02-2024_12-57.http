@@ -5,18 +5,18 @@
 POST {{hostname}}/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-username = angeldomp49 &
+username = angelupgrade &
 password = 123
 ###
 
 ### GET Check
 GET {{hostname}}/auth/check
-Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsInNob3cgb3duIGJpbGxzIiwid3JpdGUiLCJlZGl0IG93biBwcm9maWxlIl0sImV4cCI6MTcxMDk2NjE3MDMxN30=.d002fdd4bfae5c9ffbf762c8d6928ce20ef8422af94c695376d27975c73cc560
+Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOltdLCJleHAiOjE3MTEwNTg2MjY2MTR9.0d3c56cc4f6ebbca3ff4def11b15ef021b7f362c12dd4832f60f55d96aab03e6364e44fd2867b7a484fc4d33157df955ed3368df98e136c7e13aa11fdd8223aa
 
 ###
 
 ### DELETE Logout
 DELETE {{hostname}}/auth/logout
-Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsInNob3cgb3duIGJpbGxzIiwid3JpdGUiLCJlZGl0IG93biBwcm9maWxlIl0sImV4cCI6MTcxMDk2NjE3MDMxN30=.d002fdd4bfae5c9ffbf762c8d6928ce20ef8422af94c695376d27975c73cc560
+Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOltdLCJleHAiOjE3MTEwNTg2MjY2MTR9.0d3c56cc4f6ebbca3ff4def11b15ef021b7f362c12dd4832f60f55d96aab03e6364e44fd2867b7a484fc4d33157df955ed3368df98e136c7e13aa11fdd8223aa
 
 ###

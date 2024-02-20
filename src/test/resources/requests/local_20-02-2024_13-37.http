@@ -1,0 +1,11 @@
+@hostname = http://localhost:8080
+
+### POST register
+POST {{hostname}}/user
+Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjEsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTcxMTA1ODkxNjQ2MH0=.bfeae21c5c3be6b7081455b9bb51763ab4601db34f2fe9c0159fca97ca3cce3c74c3f7af81b655be2a57b7b110e0ab65e8c33a20d0aed1ddb0e69781b3b7ca24
+Content-Type: application/x-www-form-urlencoded
+
+username = shottky &
+email = angeldomp49@gmail.com &
+password = yupi2
+###
