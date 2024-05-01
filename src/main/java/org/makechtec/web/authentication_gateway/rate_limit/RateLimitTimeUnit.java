@@ -9,7 +9,7 @@ public enum RateLimitTimeUnit {
 
     private final String name;
 
-    private RateLimitTimeUnit(String name) {
+    RateLimitTimeUnit(String name) {
         this.name = name;
     }
 

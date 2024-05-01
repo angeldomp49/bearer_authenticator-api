@@ -46,6 +46,8 @@ public class AuthController {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
+            this.rateLimiter.pushAttemptToThisClient(userAddress, userAgent, clientAddress);
+
             if (!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }

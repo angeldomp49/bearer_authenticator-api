@@ -57,7 +57,6 @@ public class UserController {
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
