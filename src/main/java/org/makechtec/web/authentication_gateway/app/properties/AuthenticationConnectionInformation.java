@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http.config;
+package org.makechtec.web.authentication_gateway.app.properties;
 
 import org.springframework.beans.factory.annotation.Value;
 

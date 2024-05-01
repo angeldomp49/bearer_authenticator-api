@@ -13,22 +13,17 @@ public class CSRFTokenHandler {
 
     private static final Logger LOG = Logger.getLogger(CSRFTokenHandler.class.getName());
     private final ConnectionInformation connectionInformation;
-    private final SignaturePrinter signaturePrinter;
-    private final SaltGenerator saltGenerator;
+    private final CSRFTokenGenerator tokenGenerator;
 
-    public CSRFTokenHandler(ConnectionInformation connectionInformation, SignaturePrinter signaturePrinter, SaltGenerator saltGenerator) {
+    public CSRFTokenHandler(ConnectionInformation connectionInformation, CSRFTokenGenerator tokenGenerator) {
         this.connectionInformation = connectionInformation;
-        this.signaturePrinter = signaturePrinter;
-        this.saltGenerator = saltGenerator;
+        this.tokenGenerator = tokenGenerator;
     }
 
-    public String generateCSRFToken(){
-        return this.signaturePrinter.sign(this.saltGenerator.formatSaltToString(this.saltGenerator.generate()));
-    }
 
     public String registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-        var token = this.generateCSRFToken();
+        var token = this.tokenGenerator.generateCSRFToken();
 
         try {
 
@@ -54,7 +49,7 @@ public class CSRFTokenHandler {
     }
 
     public String registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, long userId) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        var token = this.generateCSRFToken();
+        var token = this.tokenGenerator.generateCSRFToken();
 
         try {
 

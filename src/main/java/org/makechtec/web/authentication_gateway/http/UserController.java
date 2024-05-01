@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http.rest;
+package org.makechtec.web.authentication_gateway.http;
 
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.api.user.StoredUserModel;

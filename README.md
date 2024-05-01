@@ -56,4 +56,3 @@ For login this is the expected response:
 
 Indeed, the database model is in another repository, but also you should to provide connection credentials in application.properties file,
 the application-example.properties is an example
-

@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http.rest;
+package org.makechtec.web.authentication_gateway.http;
 
 import org.json.JSONObject;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;

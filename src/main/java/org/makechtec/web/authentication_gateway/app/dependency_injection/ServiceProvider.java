@@ -1,13 +1,16 @@
-package org.makechtec.web.authentication_gateway.http.config;
+package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
+import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
+import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
+import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
-import org.makechtec.web.authentication_gateway.password.SaltGenerator;
+import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -63,8 +66,12 @@ public class ServiceProvider {
     public CSRFTokenHandler csrfTokenHandler(){
         return new CSRFTokenHandler(
                 this.connectionInformation(),
-                new SignaturePrinter(this.crypographyInformation().getSecretKey()),
-                new SaltGenerator()
+                new CSRFTokenGenerator(this.crypographyInformation().getSecretKey())
         );
+    }
+
+    @Bean
+    public RateLimiter rateLimiter(){
+        return new RateLimiter(this.connectionInformation());
     }
 }

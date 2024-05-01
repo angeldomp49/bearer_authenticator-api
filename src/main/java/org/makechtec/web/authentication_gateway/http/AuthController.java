@@ -1,10 +1,11 @@
-package org.makechtec.web.authentication_gateway.http.rest;
+package org.makechtec.web.authentication_gateway.http;
 
 
 import org.makechtec.software.json_tree.ObjectLeaf;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ public class AuthController {
 
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final CSRFTokenHandler csrfTokenHandler;
+    private final RateLimiter rateLimiter;
 
     @Autowired
-    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler) {
+    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
         this.csrfTokenHandler = csrfTokenHandler;
+        this.rateLimiter = rateLimiter;
     }
 
     @PostMapping("/login")
@@ -38,6 +41,10 @@ public class AuthController {
     ) {
 
         try {
+
+            if(!this.rateLimiter.hasAttemptsThisClient(userAddress, userAgent, clientAddress, "login")){
+                return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+            }
 
             if(!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)){
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

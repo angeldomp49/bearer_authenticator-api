@@ -3,7 +3,7 @@ package org.makechtec.web.authentication_gateway.password;
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
 import org.bouncycastle.crypto.params.Argon2Parameters;
 import org.bouncycastle.util.encoders.Hex;
-import org.makechtec.web.authentication_gateway.http.config.CrypographyInformation;
+import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
