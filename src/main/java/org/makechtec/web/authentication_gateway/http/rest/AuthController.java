@@ -4,6 +4,7 @@ package org.makechtec.web.authentication_gateway.http.rest;
 import org.makechtec.software.json_tree.ObjectLeaf;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
+import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -17,16 +18,31 @@ import java.sql.SQLException;
 public class AuthController {
 
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
+    private final CSRFTokenHandler csrfTokenHandler;
 
     @Autowired
-    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory) {
+    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
+        this.csrfTokenHandler = csrfTokenHandler;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginByUserRequest(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public ResponseEntity<String> loginByUserRequest(
+            @RequestHeader("User-Address") String userAddress,
+            @RequestHeader("User-Agent") String userAgent,
+            @RequestHeader("Client-Address") String clientAddress,
+            @RequestHeader("X-Csrf-Token") String xCsrfToken,
+
+            @RequestParam("username") String username,
+            @RequestParam("password") String password
+    ) {
 
         try {
+
+            if(!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)){
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
             var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
 
             if (!areValidCredentials) {

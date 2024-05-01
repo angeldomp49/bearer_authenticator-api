@@ -4,7 +4,10 @@ import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
+import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
+import org.makechtec.web.authentication_gateway.password.SaltGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -51,4 +54,17 @@ public class ServiceProvider {
         return new CrypographyInformation();
     }
 
+    @Bean
+    public ClientValidator clientValidator(){
+        return new ClientValidator(this.connectionInformation());
+    }
+
+    @Bean
+    public CSRFTokenHandler csrfTokenHandler(){
+        return new CSRFTokenHandler(
+                this.connectionInformation(),
+                new SignaturePrinter(this.crypographyInformation().getSecretKey()),
+                new SaltGenerator()
+        );
+    }
 }
