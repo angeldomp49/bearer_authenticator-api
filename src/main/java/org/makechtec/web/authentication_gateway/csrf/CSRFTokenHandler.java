@@ -5,6 +5,7 @@ import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.logging.Logger;
 
 public class CSRFTokenHandler {
@@ -34,7 +35,7 @@ public class CSRFTokenHandler {
                     .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
                     .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
-                    .addParamAtPosition(4, expirationDate, ParamType.TYPE_STRING)
+                    .addParamAtPosition(4, expirationDate, ParamType.TYPE_LONG)
                     .addParamAtPosition(5, token, ParamType.TYPE_STRING)
                     .update();
 
@@ -67,6 +68,7 @@ public class CSRFTokenHandler {
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("There was a problem registering csrf token in database");
+            e.printStackTrace();
             throw e;
         }
 
@@ -82,12 +84,17 @@ public class CSRFTokenHandler {
                             .queryString("""
                                     SELECT COUNT(*) AS result
                                     FROM atepoztli__authentication_service__schema.csrf_tokens
-                                    WHERE end_user_ip = ? AND user_agent = ? AND client_ip = ? AND token = ? AND expiration_date > NOW();
+                                    WHERE end_user_ip = ?
+                                    AND user_agent = ?
+                                    AND client_ip = ?
+                                    AND token = ?
+                                    AND expiration_date > ?;
                                     """)
                             .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                             .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
                             .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                             .addParamAtPosition(4, token, ParamType.TYPE_STRING)
+                            .addParamAtPosition(5, Calendar.getInstance().getTimeInMillis(), ParamType.TYPE_LONG)
                             .run(resultSet -> {
                                 resultSet.next();
 
@@ -95,7 +102,7 @@ public class CSRFTokenHandler {
                             });
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem getting csrf token information from database");
+            LOG.severe("There was a problem getting csrf token information from database: "+e.getMessage());
             throw e;
         }
 

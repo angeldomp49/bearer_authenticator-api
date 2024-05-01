@@ -24,6 +24,7 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
         try {
             this.rateLimiter.registerNewRateLimit("login", 5, RateLimitTimeUnit.MINUTE, 15);
             this.rateLimiter.registerNewRateLimit("register", 5, RateLimitTimeUnit.MINUTE, 15);
+            this.rateLimiter.registerNewRateLimit("csrf", 5, RateLimitTimeUnit.MINUTE, 15);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("Could not register rate-limiter: " + e.getMessage());
             throw new RuntimeException(e);

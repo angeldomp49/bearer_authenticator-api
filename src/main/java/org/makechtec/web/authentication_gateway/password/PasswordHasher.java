@@ -61,10 +61,6 @@ public class PasswordHasher {
         byte[] realStoredHash = Arrays.copyOfRange(storedHash, 0, 64);
         byte[] salt = Arrays.copyOfRange(storedHash, 64, storedHash.length);
 
-        System.out.println("realStoredHash: " + new String(Hex.encode(realStoredHash)));
-        System.out.println("salt: " + new String(Hex.encode(salt)));
-        System.out.println("reformed: " + new String(Hex.encode(rawHash(originalUnhashed, salt))));
-
         return MessageDigest.isEqual(rawHash(originalUnhashed, salt), storedHash);
     }
 

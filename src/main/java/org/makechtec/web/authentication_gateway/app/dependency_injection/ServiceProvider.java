@@ -9,6 +9,7 @@ import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
+import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.context.annotation.Bean;
@@ -73,5 +74,10 @@ public class ServiceProvider {
     @Bean
     public RateLimiter rateLimiter() {
         return new RateLimiter(this.connectionInformation());
+    }
+
+    @Bean
+    public CommonResponseBuilder commonResponseBuilder(){
+        return new CommonResponseBuilder();
     }
 }

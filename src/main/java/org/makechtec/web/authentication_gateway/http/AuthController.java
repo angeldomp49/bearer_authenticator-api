@@ -1,10 +1,12 @@
 package org.makechtec.web.authentication_gateway.http;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.ObjectLeaf;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,25 +15,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final Logger LOG = Logger.getLogger(AuthController.class.getName());
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final CSRFTokenHandler csrfTokenHandler;
     private final RateLimiter rateLimiter;
+    private final HttpServletRequest request;
+    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
 
     @Autowired
-    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter) {
+    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter, HttpServletRequest request) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
         this.csrfTokenHandler = csrfTokenHandler;
         this.rateLimiter = rateLimiter;
+        this.request = request;
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> loginByUserRequest(
-            @RequestHeader("User-Address") String userAddress,
+            @RequestHeader(name = "User-Address", required = false) String userAddress,
             @RequestHeader("User-Agent") String userAgent,
             @RequestHeader("Client-Address") String clientAddress,
             @RequestHeader("X-Csrf-Token") String xCsrfToken,
@@ -40,17 +48,21 @@ public class AuthController {
             @RequestParam("password") String password
     ) {
 
+        var userIP = (Objects.isNull(userAddress)) ? request.getRemoteAddr() : userAddress;
+
         try {
 
-            if (!this.rateLimiter.hasAttemptsThisClient(userAddress, userAgent, clientAddress, "login")) {
+            if (!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "login")) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
-            this.rateLimiter.pushAttemptToThisClient(userAddress, userAgent, clientAddress);
+            this.rateLimiter.pushAttemptToThisClient(userIP, userAgent, clientAddress);
 
-            if (!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)) {
+            if (!this.csrfTokenHandler.isValidCSRFToken(userIP, userAgent, clientAddress, xCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
+            this.csrfTokenHandler.deleteCSRFToken(xCsrfToken);
 
             var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
 
@@ -60,7 +72,7 @@ public class AuthController {
                                 .put("message", "Username or password are invalid")
                                 .build();
 
-                return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
             }
 
             var session = bearerAuthenticationFactory.sessionGenerator().createForUser(username);
@@ -71,7 +83,7 @@ public class AuthController {
                             .put("token", token)
                             .build();
 
-            return new ResponseEntity<>(createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
+            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
         } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
             var message =
@@ -79,7 +91,7 @@ public class AuthController {
                             .put("message", "There was an error in the application")
                             .build();
 
-            return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -95,7 +107,7 @@ public class AuthController {
                                 .put("isValid", false)
                                 .build();
 
-                return new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
             }
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             var message =
@@ -103,7 +115,7 @@ public class AuthController {
                             .put("message", "There was an error in the application")
                             .build();
 
-            return new ResponseEntity<>(createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         var isValidToken = bearerAuthenticationFactory.jwtTokenHandler().isValidSignature(token);
@@ -113,8 +125,8 @@ public class AuthController {
                         .put("isValid", isValidToken)
                         .build();
 
-        return isValidToken ? new ResponseEntity<>(createResponse(message, HttpStatus.OK), HttpStatus.OK) :
-                new ResponseEntity<>(createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+        return isValidToken ? new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK) :
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping("/logout")
@@ -129,21 +141,6 @@ public class AuthController {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    private String createResponse(ObjectLeaf content, HttpStatus status) {
-        return
-                ObjectLeaftBuilder.builder()
-                        .put("statusCode", status.value())
-                        .put("body",
-                                ObjectLeaftBuilder.builder()
-                                        .put("data",
-                                                content
-                                        )
-                                        .build()
-                        )
-                        .build()
-                        .getLeafValue();
     }
 
 }

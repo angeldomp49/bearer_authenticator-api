@@ -23,7 +23,8 @@ public class RateLimiter {
                     .isPrepared()
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.rate_limits(title, attempts, unit, time_quantity)
-                            VALUES(?,?,?,?);
+                            VALUES(?,?,?,?)
+                            ON CONFLICT (title) DO NOTHING;
                             """)
                     .addParamAtPosition(1, title, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, attempts, ParamType.TYPE_INTEGER)
@@ -32,7 +33,7 @@ public class RateLimiter {
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering csrf token in database");
+            LOG.severe("There was a problem registering rate limit record in database for title: "+title);
             throw e;
         }
     }
@@ -67,7 +68,7 @@ public class RateLimiter {
                     WHERE user_ip = ?
                     AND user_agent = ?
                     AND client_ip = ?
-                    AND created_at >= (NOW() - INTERVAL ${filter});
+                    AND created_at >= (NOW() - INTERVAL '${filter}');
                     """.replace("${filter}", beforeLimitFilter);
 
             var alreadyUsedAttempts =
@@ -86,7 +87,7 @@ public class RateLimiter {
             return hasAvailableAttempts(alreadyUsedAttempts, totalOfAttemptsAvailable.attempts());
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering csrf token in database");
+            LOG.severe("There was a problem getting attempts for this client: "+e.getMessage());
             throw e;
         }
     }
@@ -141,12 +142,12 @@ public class RateLimiter {
                             VALUES(?,?,?);
                             """)
                     .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
-                    .addParamAtPosition(2, userAgent, ParamType.TYPE_INTEGER)
+                    .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
                     .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering csrf token in database");
+            LOG.severe("There was a problem registering attempt in database: "+e.getMessage());
             throw e;
         }
     }
