@@ -42,11 +42,11 @@ public class AuthController {
 
         try {
 
-            if(!this.rateLimiter.hasAttemptsThisClient(userAddress, userAgent, clientAddress, "login")){
+            if (!this.rateLimiter.hasAttemptsThisClient(userAddress, userAgent, clientAddress, "login")) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
-            if(!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)){
+            if (!this.csrfTokenHandler.isValidCSRFToken(userAddress, userAgent, clientAddress, xCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

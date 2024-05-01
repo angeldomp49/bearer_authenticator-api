@@ -3,7 +3,6 @@ package org.makechtec.web.authentication_gateway.rate_limit;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -42,7 +41,7 @@ public class RateLimiter {
         try {
 
             var totalOfAttemptsAvailable =
-                new PostgresEngine<RateLimit>(connectionInformation)
+                    new PostgresEngine<RateLimit>(connectionInformation)
                             .isPrepared()
                             .queryString("""
                                     SELECT attempts, unit, time_quantity
@@ -61,28 +60,28 @@ public class RateLimiter {
                             });
 
             var beforeLimitFilter = calculateFilterForTime(totalOfAttemptsAvailable);
-            
+
             var queryWithTimeFilter = """
-                                SELECT COUNT(*) AS result
-                                FROM atepoztli__authentication_service__schema.client_attempts
-                                WHERE user_ip = ?
-                                AND user_agent = ?
-                                AND client_ip = ?
-                                AND created_at >= (NOW() - INTERVAL ${filter});
-                                """.replace("${filter}", beforeLimitFilter);
+                    SELECT COUNT(*) AS result
+                    FROM atepoztli__authentication_service__schema.client_attempts
+                    WHERE user_ip = ?
+                    AND user_agent = ?
+                    AND client_ip = ?
+                    AND created_at >= (NOW() - INTERVAL ${filter});
+                    """.replace("${filter}", beforeLimitFilter);
 
             var alreadyUsedAttempts =
-                new PostgresEngine<Integer>(connectionInformation)
-                        .isPrepared()
-                        .queryString(queryWithTimeFilter)
-                        .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
-                        .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                        .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
-                        .run(resultSet -> {
-                            resultSet.next();
+                    new PostgresEngine<Integer>(connectionInformation)
+                            .isPrepared()
+                            .queryString(queryWithTimeFilter)
+                            .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
+                            .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
+                            .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
+                            .run(resultSet -> {
+                                resultSet.next();
 
-                            return resultSet.getInt("result");
-                        });
+                                return resultSet.getInt("result");
+                            });
 
             return hasAvailableAttempts(alreadyUsedAttempts, totalOfAttemptsAvailable.attempts());
 
@@ -94,45 +93,41 @@ public class RateLimiter {
 
     private String calculateFilterForTime(RateLimit rateLimit) {
         String beforeLimitFilter = "";
-        switch (rateLimit.unit()){
+        switch (rateLimit.unit()) {
             case ("DAY") -> {
-                if(rateLimit.timeQuantity() == 1){
+                if (rateLimit.timeQuantity() == 1) {
                     beforeLimitFilter = "1 day";
-                }
-                else {
+                } else {
                     beforeLimitFilter = rateLimit.timeQuantity() + " days";
                 }
             }
             case ("HOUR") -> {
-                if(rateLimit.timeQuantity() == 1){
+                if (rateLimit.timeQuantity() == 1) {
                     beforeLimitFilter = "1 hour";
-                }
-                else {
+                } else {
                     beforeLimitFilter = rateLimit.timeQuantity() + " hours";
                 }
             }
             case ("MINUTE") -> {
-                if(rateLimit.timeQuantity() == 1){
+                if (rateLimit.timeQuantity() == 1) {
                     beforeLimitFilter = "1 minute";
-                }
-                else {
+                } else {
                     beforeLimitFilter = rateLimit.timeQuantity() + " minutes";
                 }
             }
             case ("SECOND") -> {
-                if(rateLimit.timeQuantity() == 1){
+                if (rateLimit.timeQuantity() == 1) {
                     beforeLimitFilter = "1 second";
-                }
-                else {
+                } else {
                     beforeLimitFilter = rateLimit.timeQuantity() + " seconds";
                 }
             }
         }
-        
+
         return beforeLimitFilter;
     }
 
-    private boolean hasAvailableAttempts(int currentAttempts, int allowedAttempts){
+    private boolean hasAvailableAttempts(int currentAttempts, int allowedAttempts) {
         return (currentAttempts + 1) < allowedAttempts;
     }
 

@@ -19,6 +19,13 @@ public class PasswordHasher {
         this.crypographyInformation = crypographyInformation;
     }
 
+    private static byte[] mergeArrays(byte[] array1, byte[] array2) {
+        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
+        buffer.put(array1);
+        buffer.put(array2);
+        return buffer.array();
+    }
+
     public byte[] rawHash(String password) {
         var salt = saltGenerator.generate();
         return rawHash(password, salt);
@@ -45,27 +52,20 @@ public class PasswordHasher {
         return mergeArrays(hash, salt);
     }
 
-    public String hash(String password){
+    public String hash(String password) {
         return new String(Hex.encode(rawHash(password)));
     }
 
-    public boolean matches(String originalUnhashed, String hashedToCompare){
+    public boolean matches(String originalUnhashed, String hashedToCompare) {
         var storedHash = Hex.decode(hashedToCompare);
         byte[] realStoredHash = Arrays.copyOfRange(storedHash, 0, 64);
         byte[] salt = Arrays.copyOfRange(storedHash, 64, storedHash.length);
 
-        System.out.println("realStoredHash: "+new String(Hex.encode(realStoredHash)));
-        System.out.println("salt: "+new String(Hex.encode(salt)));
-        System.out.println("reformed: "+new String(Hex.encode(rawHash(originalUnhashed, salt))));
+        System.out.println("realStoredHash: " + new String(Hex.encode(realStoredHash)));
+        System.out.println("salt: " + new String(Hex.encode(salt)));
+        System.out.println("reformed: " + new String(Hex.encode(rawHash(originalUnhashed, salt))));
 
         return MessageDigest.isEqual(rawHash(originalUnhashed, salt), storedHash);
-    }
-
-    private static byte[] mergeArrays(byte[] array1, byte[] array2) {
-        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
-        buffer.put(array1);
-        buffer.put(array2);
-        return buffer.array();
     }
 
 

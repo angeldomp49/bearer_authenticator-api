@@ -6,15 +6,18 @@ Content-Type: application/x-www-form-urlencoded
 
 username = shottky &
 password = yupi2
+
 ###
 
 ### GET Check
 GET {{hostname}}/auth/check
 Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjIsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOltdLCJleHAiOjE3MTEzNDkwODQzNjN9.3a12e771b5536d84e79e57dbb10497d1c5d97dbaa11d9c32852c3319a6c93da42aab331160b4df1538e29baf5a23ca73c5e5f7c03da699d9234277a285966949
+
 ###
 
 ### DELETE Logout
 DELETE {{hostname}}/auth/logout
 Authorization: Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJTSEEyNTYifQ==.eyJ1aWQiOjIsImlzQ2xvc2VkIjpmYWxzZSwicGVybWlzc2lvbnMiOltdLCJleHAiOjE3MTEzNDkwODQzNjN9.3a12e771b5536d84e79e57dbb10497d1c5d97dbaa11d9c32852c3319a6c93da42aab331160b4df1538e29baf5a23ca73c5e5f7c03da699d9234277a285966949
+
 ###
 

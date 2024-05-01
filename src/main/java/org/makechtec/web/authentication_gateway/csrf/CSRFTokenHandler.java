@@ -3,8 +3,6 @@ package org.makechtec.web.authentication_gateway.csrf;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
-import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
-import org.makechtec.web.authentication_gateway.password.SaltGenerator;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -79,22 +77,22 @@ public class CSRFTokenHandler {
 
         try {
             return
-                new PostgresEngine<Boolean>(connectionInformation)
-                        .isPrepared()
-                        .queryString("""
-                                SELECT COUNT(*) AS result
-                                FROM atepoztli__authentication_service__schema.csrf_tokens
-                                WHERE end_user_ip = ? AND user_agent = ? AND client_ip = ? AND token = ? AND expiration_date > NOW();
-                                """)
-                        .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
-                        .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                        .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
-                        .addParamAtPosition(4, token, ParamType.TYPE_STRING)
-                        .run(resultSet -> {
-                            resultSet.next();
+                    new PostgresEngine<Boolean>(connectionInformation)
+                            .isPrepared()
+                            .queryString("""
+                                    SELECT COUNT(*) AS result
+                                    FROM atepoztli__authentication_service__schema.csrf_tokens
+                                    WHERE end_user_ip = ? AND user_agent = ? AND client_ip = ? AND token = ? AND expiration_date > NOW();
+                                    """)
+                            .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
+                            .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
+                            .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
+                            .addParamAtPosition(4, token, ParamType.TYPE_STRING)
+                            .run(resultSet -> {
+                                resultSet.next();
 
-                            return resultSet.getInt("result") > 0;
-                        });
+                                return resultSet.getInt("result") > 0;
+                            });
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("There was a problem getting csrf token information from database");

@@ -20,19 +20,19 @@ public class ClientValidator {
     public boolean isAllowedClient(String ip) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
-                new PostgresEngine<Boolean>(connectionInformation)
-                        .isPrepared()
-                        .queryString("""
-                                SELECT COUNT(*) AS result
-                                FROM atepoztli__authentication_service__schema.allowed_clients
-                                WHERE ip = ?;
-                                """)
-                        .addParamAtPosition(1, ip, ParamType.TYPE_STRING)
-                        .run(resultSet -> {
-                            resultSet.next();
+                    new PostgresEngine<Boolean>(connectionInformation)
+                            .isPrepared()
+                            .queryString("""
+                                    SELECT COUNT(*) AS result
+                                    FROM atepoztli__authentication_service__schema.allowed_clients
+                                    WHERE ip = ?;
+                                    """)
+                            .addParamAtPosition(1, ip, ParamType.TYPE_STRING)
+                            .run(resultSet -> {
+                                resultSet.next();
 
-                            return resultSet.getInt("result") > 0;
-                        });
+                                return resultSet.getInt("result") > 0;
+                            });
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("There was a problem getting csrf token information from database");

@@ -1,16 +1,15 @@
 package org.makechtec.web.authentication_gateway.http;
 
-import org.json.JSONObject;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 @RestController
@@ -33,7 +32,7 @@ public class CSRFController {
     ) {
         try {
 
-            if(!this.clientValidator.isAllowedClient(clientAddress)){
+            if (!this.clientValidator.isAllowedClient(clientAddress)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
@@ -41,7 +40,7 @@ public class CSRFController {
 
             expirationDate.add(Calendar.MINUTE, 30);
 
-            var token = this.csrfTokenHandler.registerCSRFToken(userAddress,userAgent, clientAddress, expirationDate.getTimeInMillis());
+            var token = this.csrfTokenHandler.registerCSRFToken(userAddress, userAgent, clientAddress, expirationDate.getTimeInMillis());
 
             return new ResponseEntity<>(token, HttpStatus.OK);
 
@@ -49,7 +48,6 @@ public class CSRFController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
 }

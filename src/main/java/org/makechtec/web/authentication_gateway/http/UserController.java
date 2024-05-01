@@ -1,6 +1,5 @@
 package org.makechtec.web.authentication_gateway.http;
 
-import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.api.user.StoredUserModel;
 import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
@@ -36,7 +35,7 @@ public class UserController {
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("password") String password
-    ){
+    ) {
 
         var token = authorization.replace("Bearer ", "").trim();
         try {

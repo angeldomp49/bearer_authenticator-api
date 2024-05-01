@@ -27,7 +27,7 @@ public class CSRFTokenGenerator {
                         .toString();
     }
 
-    private String formatSaltToString(byte[] salt){
+    private String formatSaltToString(byte[] salt) {
         var hexString = new StringBuilder();
         for (byte b : salt) {
             hexString.append(String.format("%02x", b));
