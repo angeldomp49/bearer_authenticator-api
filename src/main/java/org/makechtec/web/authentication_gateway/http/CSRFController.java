@@ -52,6 +52,8 @@ public class CSRFController {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
+            this.rateLimiter.pushAttemptToThisClient(userIP, userAgent, clientAddress);
+
             if (!this.clientValidator.isAllowedClient(clientAddress)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }

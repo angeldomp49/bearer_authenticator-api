@@ -138,8 +138,8 @@ public class RateLimiter {
             new PostgresEngine<Void>(connectionInformation)
                     .isPrepared()
                     .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.client_attempts(user_ip, user_agent, client_ip)
-                            VALUES(?,?,?);
+                            INSERT INTO atepoztli__authentication_service__schema.client_attempts(user_ip, user_agent, client_ip, created_at)
+                            VALUES(?,?,?, NOW());
                             """)
                     .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
