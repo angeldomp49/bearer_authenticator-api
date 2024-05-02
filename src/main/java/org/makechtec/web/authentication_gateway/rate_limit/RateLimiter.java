@@ -33,7 +33,7 @@ public class RateLimiter {
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering rate limit record in database for title: "+title);
+            LOG.severe("There was a problem registering rate limit record in database for title: " + title);
             throw e;
         }
     }
@@ -87,7 +87,7 @@ public class RateLimiter {
             return hasAvailableAttempts(alreadyUsedAttempts, totalOfAttemptsAvailable.attempts());
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem getting attempts for this client: "+e.getMessage());
+            LOG.severe("There was a problem getting attempts for this client: " + e.getMessage());
             throw e;
         }
     }
@@ -147,7 +147,7 @@ public class RateLimiter {
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering attempt in database: "+e.getMessage());
+            LOG.severe("There was a problem registering attempt in database: " + e.getMessage());
             throw e;
         }
     }

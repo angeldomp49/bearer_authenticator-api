@@ -77,7 +77,7 @@ public class ServiceProvider {
     }
 
     @Bean
-    public CommonResponseBuilder commonResponseBuilder(){
+    public CommonResponseBuilder commonResponseBuilder() {
         return new CommonResponseBuilder();
     }
 }

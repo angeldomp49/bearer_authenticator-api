@@ -56,7 +56,7 @@ public class UserController {
         var token = authorization.replace("Bearer ", "").trim();
         try {
 
-            if(!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "csrf")){
+            if (!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "csrf")) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 

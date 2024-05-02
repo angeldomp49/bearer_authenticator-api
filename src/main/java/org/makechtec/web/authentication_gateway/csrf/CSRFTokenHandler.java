@@ -102,7 +102,7 @@ public class CSRFTokenHandler {
                             });
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem getting csrf token information from database: "+e.getMessage());
+            LOG.severe("There was a problem getting csrf token information from database: " + e.getMessage());
             throw e;
         }
 

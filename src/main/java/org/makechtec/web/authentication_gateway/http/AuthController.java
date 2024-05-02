@@ -2,7 +2,6 @@ package org.makechtec.web.authentication_gateway.http;
 
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.makechtec.software.json_tree.ObjectLeaf;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
