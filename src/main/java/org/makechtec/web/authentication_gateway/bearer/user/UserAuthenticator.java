@@ -1,9 +1,7 @@
 package org.makechtec.web.authentication_gateway.bearer.user;
 
-import com.google.common.hash.Hashing;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 public class UserAuthenticator {

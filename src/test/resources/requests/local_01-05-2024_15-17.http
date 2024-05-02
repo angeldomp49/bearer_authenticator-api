@@ -1,0 +1,18 @@
+@hostname = http://localhost:8080
+@csrfToken = 357189fa2af3e30af7cb816ed7a8e3d32e3ca58aa2a4c3e378f37d4c816df89418ecb7f658cbf8f9e123cfa9d4f19469863812dd1ac0a7e9d4eff23a5c67d7c5
+
+### POST csrf public to validate csrf token generation
+POST {{hostname}}/csrf/client/public
+Client-Address: 127.0.0.1
+
+
+
+### POST Login to validate csrf token consuming
+POST {{hostname}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+Client-Address: 127.0.0.1
+X-Csrf-Token: {{csrfToken}}
+
+username = angelupgrade &
+password = 123
+
