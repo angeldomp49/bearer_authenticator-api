@@ -66,9 +66,13 @@ public class ServiceProvider {
     @Bean
     public CSRFTokenHandler csrfTokenHandler() {
         return new CSRFTokenHandler(
-                this.connectionInformation(),
-                new CSRFTokenGenerator(this.crypographyInformation().getSecretKey())
+                this.connectionInformation()
         );
+    }
+
+    @Bean
+    public CSRFTokenGenerator csrfTokenGenerator(){
+        return new CSRFTokenGenerator(this.crypographyInformation().getSecretKey());
     }
 
     @Bean

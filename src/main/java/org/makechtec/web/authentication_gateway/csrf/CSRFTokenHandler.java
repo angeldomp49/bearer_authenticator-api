@@ -12,17 +12,14 @@ public class CSRFTokenHandler {
 
     private static final Logger LOG = Logger.getLogger(CSRFTokenHandler.class.getName());
     private final ConnectionInformation connectionInformation;
-    private final CSRFTokenGenerator tokenGenerator;
 
-    public CSRFTokenHandler(ConnectionInformation connectionInformation, CSRFTokenGenerator tokenGenerator) {
+    public CSRFTokenHandler(ConnectionInformation connectionInformation) {
         this.connectionInformation = connectionInformation;
-        this.tokenGenerator = tokenGenerator;
     }
 
 
-    public String registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-        var token = this.tokenGenerator.generateCSRFToken();
 
         try {
 
@@ -44,11 +41,10 @@ public class CSRFTokenHandler {
             throw e;
         }
 
-        return token;
     }
 
-    public String registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, long userId) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        var token = this.tokenGenerator.generateCSRFToken();
+    public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, long userId, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+
 
         try {
 
@@ -72,7 +68,6 @@ public class CSRFTokenHandler {
             throw e;
         }
 
-        return token;
     }
 
     public boolean isValidCSRFToken(String userIP, String userAgent, String clientIP, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
