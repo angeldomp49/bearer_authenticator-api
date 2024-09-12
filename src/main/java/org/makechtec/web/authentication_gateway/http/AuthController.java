@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/auth")
