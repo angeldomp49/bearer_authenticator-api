@@ -2,6 +2,7 @@ package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
+import org.makechtec.web.authentication_gateway.app.lifecycle.ApplicationLifeCycleListener;
 import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
@@ -84,4 +85,6 @@ public class ServiceProvider {
     public CommonResponseBuilder commonResponseBuilder() {
         return new CommonResponseBuilder();
     }
+
+
 }

@@ -1,7 +1,9 @@
 package org.makechtec.web.authentication_gateway.app.lifecycle;
 
+import org.checkerframework.checker.units.qual.A;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimitTimeUnit;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
     private static final Logger LOG = Logger.getLogger(ApplicationLifeCycleListener.class.getName());
     private final RateLimiter rateLimiter;
 
+    @Autowired
     public ApplicationLifeCycleListener(RateLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
     }
@@ -30,5 +33,7 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
             throw new RuntimeException(e);
         }
     }
+
+
 
 }

@@ -10,6 +10,7 @@ import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class AuthController {
         this.request = request;
     }
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> loginByUserRequest(
             @RequestHeader(name = "User-Address", required = false) String userAddress,
             @RequestHeader("User-Agent") String userAgent,
@@ -52,13 +53,22 @@ public class AuthController {
         try {
 
             if (!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "login")) {
-                return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+                var message =
+                        ObjectLeaftBuilder.builder()
+                                .put("message", "Too many requests")
+                                .build();
+
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
             }
 
             this.rateLimiter.pushAttemptToThisClient(userIP, userAgent, clientAddress);
 
             if (!this.csrfTokenHandler.isValidCSRFToken(userIP, userAgent, clientAddress, xCsrfToken)) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                var message =
+                        ObjectLeaftBuilder.builder()
+                                .put("message", "Unauthorized the CSRF token is invalid")
+                                .build();
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED),HttpStatus.UNAUTHORIZED);
             }
 
             this.csrfTokenHandler.deleteCSRFToken(xCsrfToken);
@@ -85,6 +95,7 @@ public class AuthController {
             return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
         } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+
             var message =
                     ObjectLeaftBuilder.builder()
                             .put("message", "There was an error in the application")
@@ -95,7 +106,7 @@ public class AuthController {
 
     }
 
-    @GetMapping("/check")
+    @GetMapping(value = "/check", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> checkToken(@RequestHeader("Authorization") String authorization) {
         var token = authorization.replace("Bearer ", "").trim();
 
@@ -106,7 +117,7 @@ public class AuthController {
                                 .put("isValid", false)
                                 .build();
 
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.OK);
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
             }
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             var message =
@@ -128,15 +139,21 @@ public class AuthController {
                 new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
-    @DeleteMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+    @DeleteMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authorization) {
 
         var token = authorization.replace("Bearer ", "").trim();
 
         try {
             bearerAuthenticationFactory.jwtTokenHandler().addToBlackList(token);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+            var message =
+                    ObjectLeaftBuilder.builder()
+                            .put("message", "There was an error in the application")
+                            .build();
+
+            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
