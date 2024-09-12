@@ -30,8 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CSRFControllerTest {
 
     @Autowired
-    private MockMvc mvc;
-    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private CSRFController csrfController;

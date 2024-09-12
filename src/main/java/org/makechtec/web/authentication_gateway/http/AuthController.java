@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private static final Logger LOG = Logger.getLogger(AuthController.class.getName());
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final CSRFTokenHandler csrfTokenHandler;
     private final RateLimiter rateLimiter;
