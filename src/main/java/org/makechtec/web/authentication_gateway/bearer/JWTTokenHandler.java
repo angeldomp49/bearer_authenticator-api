@@ -70,7 +70,7 @@ public class JWTTokenHandler {
                                     SELECT COUNT(*) AS qty
                                     FROM atepoztli__authentication_service__schema.token_blacklist
                                     WHERE token = ?;
-                                     """)
+                                    """)
                             .isPrepared()
                             .addParamAtPosition(1, token, ParamType.TYPE_STRING)
                             .run(resultSet -> {
@@ -91,7 +91,7 @@ public class JWTTokenHandler {
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.token_blacklist (token)
                             VALUES(?);
-                             """)
+                            """)
                     .isPrepared()
                     .addParamAtPosition(1, token, ParamType.TYPE_STRING)
                     .update();

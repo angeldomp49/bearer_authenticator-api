@@ -68,7 +68,7 @@ public class AuthController {
                         ObjectLeaftBuilder.builder()
                                 .put("message", "Unauthorized the CSRF token is invalid")
                                 .build();
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED),HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
             }
 
             this.csrfTokenHandler.deleteCSRFToken(xCsrfToken);

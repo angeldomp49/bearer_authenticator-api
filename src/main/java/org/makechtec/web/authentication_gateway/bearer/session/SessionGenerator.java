@@ -31,7 +31,7 @@ public class SessionGenerator {
                     new PostgresEngine<Long>(connectionInformation)
                             .queryString("""
                                     SELECT id FROM atepoztli__authentication_service__schema.users WHERE username = ?;
-                                     """)
+                                    """)
                             .isPrepared()
                             .addParamAtPosition(1, username, ParamType.TYPE_STRING)
                             .run(resultSet -> {

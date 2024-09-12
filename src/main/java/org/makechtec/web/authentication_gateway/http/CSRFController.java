@@ -73,10 +73,9 @@ public class CSRFController {
 
             var isAllowed = false;
 
-            try{
+            try {
                 isAllowed = this.clientValidator.isAllowedClient(clientAddress);
-            }
-            catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 LOG.severe("This client is not allowed due error in connection: " + e.getMessage());
             }
 

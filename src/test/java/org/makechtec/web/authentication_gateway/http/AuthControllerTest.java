@@ -1,6 +1,5 @@
 package org.makechtec.web.authentication_gateway.http;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.bearer.JWTTokenHandler;
@@ -12,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -62,13 +59,13 @@ class AuthControllerTest {
         when(bearerAuthenticationFactory.jwtTokenHandler()).thenReturn(mock(JWTTokenHandler.class));
 
         mvc.perform(
-                post("/auth/login")
-                        .header("User-Address", "127.0.0.1")
-                        .header("User-Agent", "test")
-                        .header("Client-Address", "127.0.0.1")
-                        .header("X-Csrf-Token", "Bearer test")
-                        .param("username", "test")
-                        .param("password", "test")
+                        post("/auth/login")
+                                .header("User-Address", "127.0.0.1")
+                                .header("User-Agent", "test")
+                                .header("Client-Address", "127.0.0.1")
+                                .header("X-Csrf-Token", "Bearer test")
+                                .param("username", "test")
+                                .param("password", "test")
                 )
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -209,7 +206,7 @@ class AuthControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.body.data").exists())
                 .andExpect(jsonPath("$.statusCode").exists())
-                ;
+        ;
 
     }
 
@@ -291,12 +288,12 @@ class AuthControllerTest {
         when(bearerAuthenticationFactory.jwtTokenHandler()).thenReturn(jwtTokenHandler);
 
         mvc.perform(
-                delete("/auth/logout")
-                        .header("Authorization", "Bearer test")
-        )
+                        delete("/auth/logout")
+                                .header("Authorization", "Bearer test")
+                )
                 .andDo(print())
                 .andExpect(status().isNoContent())
-                ;
+        ;
 
     }
 
