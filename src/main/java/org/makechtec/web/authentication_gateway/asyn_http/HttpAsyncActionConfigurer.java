@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.web.authentication_gateway.configuration_load.JSONConfigurationLoader;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
-import org.makechtec.web.authentication_gateway.ioc.OnStartUpListener;
+import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Controller;
@@ -33,7 +33,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
         var sanitizedConfigurationJSON = presetFilename.trim().replace(".json", "") + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX;
 
-        var jsonContent = (JSONObject) OnStartUpListener.globalContext.getItem(sanitizedConfigurationJSON);
+        var jsonContent = (JSONObject) IOCContainerBootstraper.globalContext.getItem(sanitizedConfigurationJSON);
 
         var filters = new HashSet<HttpAsyncAction>();
 
@@ -47,11 +47,11 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
             if (scope.trim().equals("singleton")) {
                 filters.add(
-                        (HttpAsyncAction) OnStartUpListener.iocContainer.getSingleton(beanId)
+                        (HttpAsyncAction) IOCContainerBootstraper.iocContainer.getSingleton(beanId)
                 );
             } else {
                 filters.add(
-                        (HttpAsyncAction) OnStartUpListener.iocContainer.getPrototype(beanId)
+                        (HttpAsyncAction) IOCContainerBootstraper.iocContainer.getPrototype(beanId)
                 );
             }
 
@@ -62,7 +62,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        loadAllConfigurationFiles(OnStartUpListener.globalContext);
+        loadAllConfigurationFiles(IOCContainerBootstraper.globalContext);
     }
 
     private void loadAllConfigurationFiles(EnvironmentContext context) {
@@ -75,7 +75,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
         var referenceFile = new File(referenceFileURL.getFile());
 
-        var jsonConfigurationLoader = (JSONConfigurationLoader) OnStartUpListener.iocContainer.getSingleton("jsonConfigurationLoader");
+        var jsonConfigurationLoader = (JSONConfigurationLoader) IOCContainerBootstraper.iocContainer.getSingleton("jsonConfigurationLoader");
         var jsonConfiguration = jsonConfigurationLoader.loadConfiguration(referenceFile);
 
         context.setItem(HTTP_ASYNC_ACTION_REFERENCE_FILENAME + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX, jsonConfiguration);
@@ -103,7 +103,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
     }
 
     private JSONObject findJsonObjectByBeanId(String beanId) {
-        var filterReferenceJson = (JSONObject) OnStartUpListener.globalContext.getItem(HTTP_ASYNC_ACTION_REFERENCE_JSON);
+        var filterReferenceJson = (JSONObject) IOCContainerBootstraper.globalContext.getItem(HTTP_ASYNC_ACTION_REFERENCE_JSON);
 
         JSONArray filters = filterReferenceJson.getJSONArray("filters");
 

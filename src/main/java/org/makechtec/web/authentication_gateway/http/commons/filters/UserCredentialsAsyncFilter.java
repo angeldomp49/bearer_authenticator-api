@@ -16,11 +16,12 @@ public class UserCredentialsAsyncFilter implements RequestValidationAsyncFilter 
     private static final int RESULT_SUCCESS = 1;
     private static final int RESULT_FAILED_SQL_CONNECTION = 2;
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
+    private final CommonResponseBuilder commonResponseBuilder;
     private int result;
 
-    public UserCredentialsAsyncFilter(BearerAuthenticationFactory bearerAuthenticationFactory) {
+    public UserCredentialsAsyncFilter(BearerAuthenticationFactory bearerAuthenticationFactory, CommonResponseBuilder commonResponseBuilder) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
+        this.commonResponseBuilder = commonResponseBuilder;
     }
 
     @Override

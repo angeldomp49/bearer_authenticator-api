@@ -16,11 +16,12 @@ public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
     private static final int RESULT_SUCCESS = 1;
     private static final int RESULT_FAILED_SQL_CONNECTION = 2;
     private final CSRFTokenHandler csrfTokenHandler;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
+    private final CommonResponseBuilder commonResponseBuilder;
     private int result;
 
-    public CSRFTokenAsyncFilter(CSRFTokenHandler csrfTokenHandler) {
+    public CSRFTokenAsyncFilter(CSRFTokenHandler csrfTokenHandler, CommonResponseBuilder commonResponseBuilder) {
         this.csrfTokenHandler = csrfTokenHandler;
+        this.commonResponseBuilder = commonResponseBuilder;
     }
 
     @Override

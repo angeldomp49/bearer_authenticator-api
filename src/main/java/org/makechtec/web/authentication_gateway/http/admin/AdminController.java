@@ -53,7 +53,9 @@ public class AdminController {
                         .stream()
                         .parallel()
                         .filter(validationFilter -> !validationFilter.canPassRequest(context))
+                        .peek(System.out::println)
                         .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                        .peek(System.out::println)
                         .findFirst();
 
         if (possiblyErrorResponse.isPresent()) {

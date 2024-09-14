@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.web.authentication_gateway.configuration_load.JSONConfigurationLoader;
-import org.makechtec.web.authentication_gateway.ioc.OnStartUpListener;
+import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
         var sanitizedConfigurationJSON = presetFilename.trim().replace(".json", "") + FILTER_CONFIGURATION_JSON_SUFFIX;
 
-        var jsonContent = (JSONObject) OnStartUpListener.globalContext.getItem(sanitizedConfigurationJSON);
+        var jsonContent = (JSONObject) IOCContainerBootstraper.globalContext.getItem(sanitizedConfigurationJSON);
 
         var filters = new HashSet<RequestValidationAsyncFilter>();
 
@@ -45,11 +45,11 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
             if (scope.trim().equals("singleton")) {
                 filters.add(
-                        (RequestValidationAsyncFilter) OnStartUpListener.iocContainer.getSingleton(beanId)
+                        (RequestValidationAsyncFilter) IOCContainerBootstraper.iocContainer.getSingleton(beanId)
                 );
             } else {
                 filters.add(
-                        (RequestValidationAsyncFilter) OnStartUpListener.iocContainer.getPrototype(beanId)
+                        (RequestValidationAsyncFilter) IOCContainerBootstraper.iocContainer.getPrototype(beanId)
                 );
             }
 
@@ -60,7 +60,7 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        loadAllFilterConfigurationFiles(OnStartUpListener.globalContext);
+        loadAllFilterConfigurationFiles(IOCContainerBootstraper.globalContext);
     }
 
     private void loadAllFilterConfigurationFiles(EnvironmentContext context) {
@@ -73,10 +73,10 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
         var referenceFile = new File(referenceFileURL.getFile());
 
-        var jsonConfigurationLoader = (JSONConfigurationLoader) OnStartUpListener.iocContainer.getSingleton("jsonConfigurationLoader");
+        var jsonConfigurationLoader = (JSONConfigurationLoader) IOCContainerBootstraper.iocContainer.getSingleton("jsonConfigurationLoader");
         var jsonConfiguration = jsonConfigurationLoader.loadConfiguration(referenceFile);
 
-        context.setItem(FILTER_REFERENCE_FILENAME + FILTER_CONFIGURATION_JSON_SUFFIX, jsonConfiguration);
+        context.setItem(FILTER_REFERENCE_FILENAME.replace(".json", "") + FILTER_CONFIGURATION_JSON_SUFFIX, jsonConfiguration);
 
         var filterDirectoryURL = RequestValidationFilterConfigurer.class.getClassLoader().getResource(FILTER_CONFIGURATION_DIRECTORY);
 
@@ -95,13 +95,13 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
         Arrays.stream(filterDirectory.listFiles())
                 .forEach(file -> {
                     var jsonContent = jsonConfigurationLoader.loadConfiguration(file);
-                    context.setItem(file.getName() + FILTER_CONFIGURATION_JSON_SUFFIX, jsonContent);
+                    context.setItem(file.getName().replace(".json", "") + FILTER_CONFIGURATION_JSON_SUFFIX, jsonContent);
                 });
 
     }
 
     private JSONObject findJsonObjectByBeanId(String beanId) {
-        var filterReferenceJson = (JSONObject) OnStartUpListener.globalContext.getItem(FILTER_REFERENCE_JSON);
+        var filterReferenceJson = (JSONObject) IOCContainerBootstraper.globalContext.getItem(FILTER_REFERENCE_FILENAME.replace(".json", "") + FILTER_CONFIGURATION_JSON_SUFFIX);
 
         JSONArray filters = filterReferenceJson.getJSONArray("filters");
 
