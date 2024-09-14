@@ -1,0 +1,46 @@
+{
+  "filters": [
+    {
+      "beanId": "CSRFTokenFilter",
+      "scope": "singleton",
+      "params": [
+        "userIP",
+        "userAgent",
+        "csrfToken"
+      ]
+    },
+    {
+      "beanId": "CredentialsFilter",
+      "scope": "singleton",
+      "params": [
+        "username",
+        "password"
+      ]
+    },
+    {
+      "beanId": "userRateLimitFilter",
+      "scope": "singleton",
+      "params": [
+        "userIP",
+        "userAgent",
+        "userRateLimitTitle"
+      ]
+    },
+    {
+      "beanId": "clientRateLimitFilter",
+      "scope": "singleton",
+      "params": [
+        "clientAddress",
+        "clientAgent",
+        "clientRateLimitTitle"
+      ]
+    },
+    {
+      "beanId": "clientAddressFilter",
+      "scope": "singleton",
+      "params": [
+        "clientAddress"
+      ]
+    }
+  ]
+}
