@@ -20,14 +20,14 @@ import java.util.Set;
 public class HttpAsyncActionConfigurer implements ApplicationListener<ApplicationReadyEvent> {
 
 
-    private static final String HTTP_ASYNC_ACTION_REFERENCE_FILENAME = "httpAsyncActionReference.json";
     public static final String HTTP_ASYNC_ACTION_REFERENCE_JSON = "reference";
     public static final String HTTP_ASYNC_ACTION_CONFIGURATION_DIRECTORY = "http-action-configuration";
     public static final String HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX = "HttpAsyncActionConfigurationJSON";
+    private static final String HTTP_ASYNC_ACTION_REFERENCE_FILENAME = "httpAsyncActionReference.json";
 
-    public Set<HttpAsyncAction> provideActions(final String presetFilename, final String actionName){
+    public Set<HttpAsyncAction> provideActions(final String presetFilename, final String actionName) {
 
-        if(presetFilename.isBlank()){
+        if (presetFilename.isBlank()) {
             throw new IllegalArgumentException("PresetFilename cannot be blank");
         }
 
@@ -39,18 +39,17 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
         JSONArray jsonFilterList = jsonContent.getJSONArray(actionName.trim());
 
-        for(int i = 0; i < jsonFilterList.length(); i++){
+        for (int i = 0; i < jsonFilterList.length(); i++) {
 
             var beanId = jsonFilterList.getString(i);
 
             var scope = findJsonObjectByBeanId(beanId).getString("scope");
 
-            if(scope.trim().equals("singleton")){
+            if (scope.trim().equals("singleton")) {
                 filters.add(
                         (HttpAsyncAction) OnStartUpListener.iocContainer.getSingleton(beanId)
                 );
-            }
-            else{
+            } else {
                 filters.add(
                         (HttpAsyncAction) OnStartUpListener.iocContainer.getPrototype(beanId)
                 );
@@ -66,11 +65,11 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
         loadAllConfigurationFiles(OnStartUpListener.globalContext);
     }
 
-    private void loadAllConfigurationFiles(EnvironmentContext context){
+    private void loadAllConfigurationFiles(EnvironmentContext context) {
 
         var referenceFileURL = RequestValidationFilterConfigurer.class.getClassLoader().getResource(HTTP_ASYNC_ACTION_REFERENCE_FILENAME);
 
-        if(Objects.isNull(referenceFileURL)){
+        if (Objects.isNull(referenceFileURL)) {
             throw new RuntimeException("Reference file not found for the name: " + HTTP_ASYNC_ACTION_REFERENCE_FILENAME);
         }
 
@@ -85,13 +84,13 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
         var dirNonExists = Objects.isNull(filterDirectoryURL);
 
-        if(dirNonExists){
+        if (dirNonExists) {
             return;
         }
 
         var filterDirectory = new File(filterDirectoryURL.getFile());
 
-        if(Objects.isNull(filterDirectory.listFiles())){
+        if (Objects.isNull(filterDirectory.listFiles())) {
             return;
         }
 
@@ -103,15 +102,15 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
     }
 
-    private JSONObject findJsonObjectByBeanId(String beanId){
+    private JSONObject findJsonObjectByBeanId(String beanId) {
         var filterReferenceJson = (JSONObject) OnStartUpListener.globalContext.getItem(HTTP_ASYNC_ACTION_REFERENCE_JSON);
 
         JSONArray filters = filterReferenceJson.getJSONArray("filters");
 
-        for(int i = 0; i < filters.length(); i++){
+        for (int i = 0; i < filters.length(); i++) {
             var filterObject = filters.getJSONObject(i);
 
-            if(filterObject.getString("beanId").equals(beanId)){
+            if (filterObject.getString("beanId").equals(beanId)) {
                 return filterObject;
             }
         }

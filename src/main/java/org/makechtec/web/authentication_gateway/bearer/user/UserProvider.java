@@ -17,7 +17,7 @@ public class UserProvider {
         this.connectionInformation = connectionInformation;
     }
 
-    Optional<User> byUsername(String username) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Optional<User> byUsername(String username) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
                     new PostgresEngine<Optional<User>>(connectionInformation)

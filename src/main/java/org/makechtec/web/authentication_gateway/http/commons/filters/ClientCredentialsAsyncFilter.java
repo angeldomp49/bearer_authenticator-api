@@ -7,7 +7,6 @@ import org.makechtec.web.authentication_gateway.filtering.ValidationFailedRespon
 public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilter {
 
 
-
     @Override
     public boolean canPassRequest(EnvironmentContext context) {
         return false;

@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public class BeansDefinition {
 
-    public static Set<BeanInformation> beans(){
+    public static Set<BeanInformation> beans() {
         var beans = new HashSet<BeanInformation>();
 
         beans.add(new BeanInformation(
@@ -76,16 +76,15 @@ public class BeansDefinition {
                 InstanceScope.SINGLETON,
                 args -> {
                     var container = (IOCContainer) args[1];
-                    
+
                     return new PushUserAttemptAction(
-                            (RateLimiter) container.getSingleton("rateLimiter"), 
+                            (RateLimiter) container.getSingleton("rateLimiter"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );
                 },
-                Stream.of("rateLimiter","commonResponseBuilder").collect(Collectors.toSet())
+                Stream.of("rateLimiter", "commonResponseBuilder").collect(Collectors.toSet())
         ));
-        
-        
+
 
         beans.add(new BeanInformation(
                 "csrfTokenHandler",
@@ -118,7 +117,7 @@ public class BeansDefinition {
                 InstanceScope.SINGLETON,
                 args -> {
                     var context = (EnvironmentContext) args[0];
-                    
+
                     return new RateLimiter((ConnectionInformation) context.getItem("globalDatabaseConnectionInformation"));
                 }
         ));
@@ -142,7 +141,7 @@ public class BeansDefinition {
                     return new SignaturePrinter((String) context.getItem("applicationSecretKey"));
                 }
         ));
-        
+
         beans.add(new BeanInformation(
                 "passwordHasher",
                 InstanceScope.SINGLETON,

@@ -13,7 +13,7 @@ public class OnStartUpListener implements ApplicationListener<ApplicationReadyEv
     public static IOCContainer iocContainer;
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event){
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         globalContext = new EnvironmentContext();
 
         iocContainer = new IOCContainer(globalContext);

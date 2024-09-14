@@ -12,7 +12,7 @@ public class JSONConfigurationLoader {
     public JSONObject loadConfiguration(File configurationFile) {
         var filename = configurationFile.getName();
 
-        try(var filterReferenceInputStream = new FileInputStream(configurationFile)){
+        try (var filterReferenceInputStream = new FileInputStream(configurationFile)) {
 
             return new JSONObject(new String(filterReferenceInputStream.readAllBytes()));
 

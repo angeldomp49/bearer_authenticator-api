@@ -13,11 +13,11 @@ import java.sql.SQLException;
 
 public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
 
+    private static final int RESULT_SUCCESS = 1;
+    private static final int RESULT_FAILED_SQL_CONNECTION = 2;
     private final CSRFTokenHandler csrfTokenHandler;
     private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
     private int result;
-    private static final int RESULT_SUCCESS = 1;
-    private static final int RESULT_FAILED_SQL_CONNECTION = 2;
 
     public CSRFTokenAsyncFilter(CSRFTokenHandler csrfTokenHandler) {
         this.csrfTokenHandler = csrfTokenHandler;
@@ -28,11 +28,11 @@ public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
         try {
             var validationResult =
                     !this.csrfTokenHandler.isValidCSRFToken(
-                    (String) context.getItem("userIP"),
-                    (String) context.getItem("userAgent"),
-                    (String) context.getItem("clientAddress"),
-                    (String) context.getItem("csrfToken")
-            );
+                            (String) context.getItem("userIP"),
+                            (String) context.getItem("userAgent"),
+                            (String) context.getItem("clientAddress"),
+                            (String) context.getItem("csrfToken")
+                    );
 
             result = RESULT_SUCCESS;
 

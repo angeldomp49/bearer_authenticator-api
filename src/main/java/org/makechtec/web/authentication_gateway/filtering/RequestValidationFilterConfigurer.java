@@ -18,14 +18,14 @@ import java.util.Set;
 @Component
 public class RequestValidationFilterConfigurer implements ApplicationListener<ApplicationReadyEvent> {
 
-    private static final String FILTER_REFERENCE_FILENAME = "filterReference.json";
     public static final String FILTER_REFERENCE_JSON = "reference";
     public static final String FILTER_CONFIGURATION_DIRECTORY = "filter-configuration";
     public static final String FILTER_CONFIGURATION_JSON_SUFFIX = "FilterConfigurationJSON";
+    private static final String FILTER_REFERENCE_FILENAME = "filterReference.json";
 
-    public Set<RequestValidationAsyncFilter> provideFilters(final String presetFilename, final String actionName){
+    public Set<RequestValidationAsyncFilter> provideFilters(final String presetFilename, final String actionName) {
 
-        if(presetFilename.isBlank()){
+        if (presetFilename.isBlank()) {
             throw new IllegalArgumentException("PresetFilename cannot be blank");
         }
 
@@ -37,18 +37,17 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
         JSONArray jsonFilterList = jsonContent.getJSONArray(actionName.trim());
 
-        for(int i = 0; i < jsonFilterList.length(); i++){
+        for (int i = 0; i < jsonFilterList.length(); i++) {
 
             var beanId = jsonFilterList.getString(i);
 
             var scope = findJsonObjectByBeanId(beanId).getString("scope");
 
-            if(scope.trim().equals("singleton")){
+            if (scope.trim().equals("singleton")) {
                 filters.add(
                         (RequestValidationAsyncFilter) OnStartUpListener.iocContainer.getSingleton(beanId)
                 );
-            }
-            else{
+            } else {
                 filters.add(
                         (RequestValidationAsyncFilter) OnStartUpListener.iocContainer.getPrototype(beanId)
                 );
@@ -64,11 +63,11 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
         loadAllFilterConfigurationFiles(OnStartUpListener.globalContext);
     }
 
-    private void loadAllFilterConfigurationFiles(EnvironmentContext context){
+    private void loadAllFilterConfigurationFiles(EnvironmentContext context) {
 
         var referenceFileURL = RequestValidationFilterConfigurer.class.getClassLoader().getResource(FILTER_REFERENCE_FILENAME);
 
-        if(Objects.isNull(referenceFileURL)){
+        if (Objects.isNull(referenceFileURL)) {
             throw new RuntimeException("Reference file not found for the name: " + FILTER_REFERENCE_FILENAME);
         }
 
@@ -83,13 +82,13 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
         var dirNonExists = Objects.isNull(filterDirectoryURL);
 
-        if(dirNonExists){
+        if (dirNonExists) {
             return;
         }
 
         var filterDirectory = new File(filterDirectoryURL.getFile());
 
-        if(Objects.isNull(filterDirectory.listFiles())){
+        if (Objects.isNull(filterDirectory.listFiles())) {
             return;
         }
 
@@ -101,15 +100,15 @@ public class RequestValidationFilterConfigurer implements ApplicationListener<Ap
 
     }
 
-    private JSONObject findJsonObjectByBeanId(String beanId){
+    private JSONObject findJsonObjectByBeanId(String beanId) {
         var filterReferenceJson = (JSONObject) OnStartUpListener.globalContext.getItem(FILTER_REFERENCE_JSON);
 
         JSONArray filters = filterReferenceJson.getJSONArray("filters");
 
-        for(int i = 0; i < filters.length(); i++){
+        for (int i = 0; i < filters.length(); i++) {
             var filterObject = filters.getJSONObject(i);
 
-            if(filterObject.getString("beanId").equals(beanId)){
+            if (filterObject.getString("beanId").equals(beanId)) {
                 return filterObject;
             }
         }

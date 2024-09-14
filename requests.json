@@ -3,11 +3,11 @@
     {
       "url": "/auth/login",
       "headers": {
-        "Authorization":  "the client API token",
+        "Authorization": "the client API token",
         "Content-Type": "application/json",
         "User-Agent": "the client agent"
       },
-      "user":{
+      "user": {
         "userAddress": "ip style",
         "userAgent": "user agent",
         "username": "username",

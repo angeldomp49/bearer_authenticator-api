@@ -68,12 +68,12 @@ public class AuthController {
 
         var possiblyErrorResponse =
                 requestValidationFilterConfigurer.provideFilters("authControllerFilters", "login")
-                    .stream()
-                    .filter(validationFilter -> validationFilter.canPassRequest(context))
-                    .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
-                    .findFirst();
+                        .stream()
+                        .filter(validationFilter -> validationFilter.canPassRequest(context))
+                        .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                        .findFirst();
 
-        if(possiblyErrorResponse.isPresent()) {
+        if (possiblyErrorResponse.isPresent()) {
             return possiblyErrorResponse.get().responseEntity();
         }
 
@@ -86,7 +86,7 @@ public class AuthController {
                         .map(action -> action.createFailedResponse(context))
                         .findFirst();
 
-        if(possiblyErrorInAction.isPresent()) {
+        if (possiblyErrorInAction.isPresent()) {
             return possiblyErrorInAction.get().responseEntity();
         }
 

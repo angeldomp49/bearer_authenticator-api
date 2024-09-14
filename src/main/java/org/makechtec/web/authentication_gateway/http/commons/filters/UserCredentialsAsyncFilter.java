@@ -13,12 +13,11 @@ import java.sql.SQLException;
 
 public class UserCredentialsAsyncFilter implements RequestValidationAsyncFilter {
 
-    private final BearerAuthenticationFactory bearerAuthenticationFactory;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
-
-    private int result;
     private static final int RESULT_SUCCESS = 1;
     private static final int RESULT_FAILED_SQL_CONNECTION = 2;
+    private final BearerAuthenticationFactory bearerAuthenticationFactory;
+    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
+    private int result;
 
     public UserCredentialsAsyncFilter(BearerAuthenticationFactory bearerAuthenticationFactory) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;

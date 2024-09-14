@@ -13,11 +13,11 @@ import java.sql.SQLException;
 
 public class UserRateLimitAsyncFilter implements RequestValidationAsyncFilter {
 
+    private static final int RESULT_SUCCESS = 1;
+    private static final int RESULT_FAILED_SQL_CONNECTION = 2;
     private final RateLimiter rateLimiter;
     private final CommonResponseBuilder commonResponseBuilder;
     private int result;
-    private static final int RESULT_SUCCESS = 1;
-    private static final int RESULT_FAILED_SQL_CONNECTION = 2;
 
     public UserRateLimitAsyncFilter(RateLimiter rateLimiter, CommonResponseBuilder commonResponseBuilder) {
         this.rateLimiter = rateLimiter;

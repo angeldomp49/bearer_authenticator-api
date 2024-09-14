@@ -13,12 +13,11 @@ import java.sql.SQLException;
 
 public class ClientAddressAsyncFilter implements RequestValidationAsyncFilter {
 
-    private final ClientValidator clientValidator;
-    private final CommonResponseBuilder responseBuilder;
-
-    private int result;
     private static final int RESULT_SUCCESS = 1;
     private static final int RESULT_FAILED_SQL_CONNECTION = 2;
+    private final ClientValidator clientValidator;
+    private final CommonResponseBuilder responseBuilder;
+    private int result;
 
     public ClientAddressAsyncFilter(ClientValidator clientValidator, CommonResponseBuilder responseBuilder) {
         this.clientValidator = clientValidator;

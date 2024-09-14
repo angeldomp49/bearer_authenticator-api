@@ -34,7 +34,7 @@ public class AdminController {
             @RequestHeader("X-Csrf-Token") String xCsrfToken,
             @RequestBody String body,
             HttpServletRequest request
-    ){
+    ) {
 
         var userIP = request.getRemoteAddr();
         var jsonBody = new JSONObject(body);
@@ -56,7 +56,7 @@ public class AdminController {
                         .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
                         .findFirst();
 
-        if(possiblyErrorResponse.isPresent()) {
+        if (possiblyErrorResponse.isPresent()) {
             return possiblyErrorResponse.get().responseEntity();
         }
 
@@ -69,7 +69,7 @@ public class AdminController {
                         .map(action -> action.createFailedResponse(context))
                         .findFirst();
 
-        if(possiblyErrorInAction.isPresent()) {
+        if (possiblyErrorInAction.isPresent()) {
             return possiblyErrorInAction.get().responseEntity();
         }
 
@@ -83,7 +83,6 @@ public class AdminController {
         return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
     }
-
 
 
 }

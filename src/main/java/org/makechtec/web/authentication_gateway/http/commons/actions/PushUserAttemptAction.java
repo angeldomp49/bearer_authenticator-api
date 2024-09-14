@@ -44,7 +44,6 @@ public class PushUserAttemptAction implements HttpAsyncAction {
         }
 
 
-
     }
 
     @Override
@@ -61,7 +60,7 @@ public class PushUserAttemptAction implements HttpAsyncAction {
                         .build();
 
         return new FailedAsyncActionResponse(
-            new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
 

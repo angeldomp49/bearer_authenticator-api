@@ -4,21 +4,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
-import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @RestController
@@ -59,7 +54,7 @@ public class CSRFController {
                         .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
                         .findFirst();
 
-        if(possiblyErrorResponse.isPresent()) {
+        if (possiblyErrorResponse.isPresent()) {
             return possiblyErrorResponse.get().responseEntity();
         }
 
@@ -72,7 +67,7 @@ public class CSRFController {
                         .map(action -> action.createFailedResponse(context))
                         .findFirst();
 
-        if(possiblyErrorInAction.isPresent()) {
+        if (possiblyErrorInAction.isPresent()) {
             return possiblyErrorInAction.get().responseEntity();
         }
 
