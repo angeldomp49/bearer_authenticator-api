@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'org.makechtec.software:json_tree:2.0.0'
     implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
+    implementation("org.makechtec.software:ioc_container:1.0.0")
 }
 
 tasks.named('test') {
