@@ -29,7 +29,7 @@ public class GenerateJWTTokenAction implements HttpAsyncAction {
 
     @Override
     public void perform(EnvironmentContext context) {
-        SessionInformation session = null;
+        SessionInformation session;
 
         try {
             session = bearerAuthenticationFactory.sessionGenerator().createForUser((String) context.getItem("username"));

@@ -25,8 +25,6 @@ import java.sql.SQLException;
 public class AuthController {
 
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
-    private final CSRFTokenHandler csrfTokenHandler;
-    private final RateLimiter rateLimiter;
     private final HttpServletRequest request;
     private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
     private final RequestValidationFilterConfigurer requestValidationFilterConfigurer = new RequestValidationFilterConfigurer();
@@ -35,8 +33,6 @@ public class AuthController {
     @Autowired
     public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter, HttpServletRequest request, HttpAsyncActionConfigurer httpAsyncActionConfigurer) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
-        this.csrfTokenHandler = csrfTokenHandler;
-        this.rateLimiter = rateLimiter;
         this.request = request;
         this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
     }

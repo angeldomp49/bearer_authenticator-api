@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 @RequestMapping("csrf")
 public class CSRFController {
 
-    private static final Logger LOG = Logger.getLogger(CSRFController.class.getName());
     private final RequestValidationFilterConfigurer requestValidationFilterConfigurer;
     private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
     private final CommonResponseBuilder responseBuilder;
