@@ -1,0 +1,41 @@
+{
+  "requests": [
+    {
+      "url": "/auth/login",
+      "headers": {
+        "Authorization":  "the client API token",
+        "Content-Type": "application/json",
+        "User-Agent": "the client agent"
+      },
+      "user":{
+        "userAddress": "ip style",
+        "userAgent": "user agent",
+        "username": "username",
+        "password": "some password",
+        "csrfToken": "the user CSRF token"
+      }
+    },
+    {
+      "url": "/auth/check",
+      "headers": {
+        "Authorization": "the client API token",
+        "Content-Type": "application/json",
+        "User-Agent": "the client agent"
+      },
+      "user": {
+        "userAddress": "ip style",
+        "userAgent": "user agent",
+        "username": "username",
+        "password": "some password",
+        "authorization": "the user API token"
+      }
+    },
+    {
+      "url": "csrf/client",
+      "headers": {
+        "Content-Type": "application/json",
+        "User-Agent": "the client agent"
+      }
+    }
+  ]
+}
