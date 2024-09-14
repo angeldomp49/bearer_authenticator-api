@@ -1,10 +1,14 @@
-package org.makechtec.web.authentication_gateway.http;
+package org.makechtec.web.authentication_gateway.http.auth;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.json.JSONObject;
+import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
+import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
@@ -26,81 +29,75 @@ public class AuthController {
     private final RateLimiter rateLimiter;
     private final HttpServletRequest request;
     private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
+    private final RequestValidationFilterConfigurer requestValidationFilterConfigurer = new RequestValidationFilterConfigurer();
+    private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
 
     @Autowired
-    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter, HttpServletRequest request) {
+    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter, HttpServletRequest request, HttpAsyncActionConfigurer httpAsyncActionConfigurer) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
         this.csrfTokenHandler = csrfTokenHandler;
         this.rateLimiter = rateLimiter;
         this.request = request;
+        this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> loginByUserRequest(
-            @RequestHeader(name = "User-Address", required = false) String userAddress,
-            @RequestHeader("User-Agent") String userAgent,
-            @RequestHeader("Client-Address") String clientAddress,
-            @RequestHeader("X-Csrf-Token") String xCsrfToken,
-
-            @RequestParam("username") String username,
-            @RequestParam("password") String password
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody String body
     ) {
 
-        var userIP = (Objects.isNull(userAddress)) ? request.getRemoteAddr() : userAddress;
+        var jsonBody = new JSONObject(body);
 
-        try {
+        var clientAddress = request.getRemoteAddr();
+        String userAgent = jsonBody.getString("userAgent");
+        String userIP = jsonBody.getString("userAddress");
+        String xCsrfToken = jsonBody.getString("csrfToken");
+        String username = jsonBody.getString("username");
+        String password = jsonBody.getString("password");
 
-            if (!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "login")) {
-                var message =
-                        ObjectLeaftBuilder.builder()
-                                .put("message", "Too many requests")
-                                .build();
+        var context = new EnvironmentContext();
 
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
-            }
+        context.setItem("clientAddress", clientAddress);
+        context.setItem("userAddress", userIP);
+        context.setItem("userAgent", userAgent);
+        context.setItem("username", username);
+        context.setItem("password", password);
+        context.setItem("csrfToken", xCsrfToken);
+        context.setItem("rateLimitTitle", "login");
 
-            this.rateLimiter.pushAttemptToThisClient(userIP, userAgent, clientAddress);
+        var possiblyErrorResponse =
+                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "login")
+                    .stream()
+                    .filter(validationFilter -> validationFilter.canPassRequest(context))
+                    .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                    .findFirst();
 
-            if (!this.csrfTokenHandler.isValidCSRFToken(userIP, userAgent, clientAddress, xCsrfToken)) {
-                var message =
-                        ObjectLeaftBuilder.builder()
-                                .put("message", "Unauthorized the CSRF token is invalid")
-                                .build();
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
-            }
-
-            this.csrfTokenHandler.deleteCSRFToken(xCsrfToken);
-
-            var areValidCredentials = bearerAuthenticationFactory.userAuthenticator().areValidCredentials(username, password);
-
-            if (!areValidCredentials) {
-                var message =
-                        ObjectLeaftBuilder.builder()
-                                .put("message", "Username or password are invalid")
-                                .build();
-
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
-            }
-
-            var session = bearerAuthenticationFactory.sessionGenerator().createForUser(username);
-            var token = bearerAuthenticationFactory.jwtTokenHandler().createTokenForSession(session);
-
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("token", token)
-                            .build();
-
-            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
-
-        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("message", "There was an error in the application")
-                            .build();
-
-            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        if(possiblyErrorResponse.isPresent()) {
+            return possiblyErrorResponse.get().responseEntity();
         }
+
+        var possiblyErrorInAction =
+                httpAsyncActionConfigurer.provideActions("adminControllerActions", "login")
+                        .stream()
+                        .parallel()
+                        .peek(action -> action.perform(context))
+                        .filter(action -> !action.hasSuccessfulFinished(context))
+                        .map(action -> action.createFailedResponse(context))
+                        .findFirst();
+
+        if(possiblyErrorInAction.isPresent()) {
+            return possiblyErrorInAction.get().responseEntity();
+        }
+
+        var jwtToken = (String) context.getItem("jwtToken");
+
+        var message =
+                ObjectLeaftBuilder.builder()
+                        .put("token", jwtToken)
+                        .build();
+
+        return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
     }
 
