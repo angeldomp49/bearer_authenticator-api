@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.ioc;
+package org.makechtec.web.authentication_gateway.mock.ioc;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.ioc_container.ioc.BeanInformation;
@@ -18,17 +18,19 @@ import org.makechtec.web.authentication_gateway.http.commons.actions.PushUserAtt
 import org.makechtec.web.authentication_gateway.http.commons.filters.*;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
+import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BeansDefinition {
+import static org.mockito.Mockito.when;
 
-    Set<BeanInformation> beans;
+public class BeansDefinitionMock {
 
     public static Set<BeanInformation> beans() {
+
         var beans = new HashSet<BeanInformation>();
 
         beans.add(new BeanInformation(
@@ -164,7 +166,10 @@ public class BeansDefinition {
                 args -> {
                     var context = (EnvironmentContext) args[0];
 
-                    return new CSRFTokenHandler((ConnectionInformation) context.getItem("globalDatabaseConnectionInformation"));
+                    var mock = Mockito.mock(CSRFTokenHandler.class);
+
+
+                    return mock;
                 }
         ));
 
@@ -190,7 +195,9 @@ public class BeansDefinition {
                 args -> {
                     var context = (EnvironmentContext) args[0];
 
-                    return new RateLimiter((ConnectionInformation) context.getItem("globalDatabaseConnectionInformation"));
+                    var mock = Mockito.mock(RateLimiter.class);
+
+                    return mock;
                 }
         ));
 
@@ -200,7 +207,10 @@ public class BeansDefinition {
                 args -> {
                     var context = (EnvironmentContext) args[0];
 
-                    return new ClientValidator((ConnectionInformation) context.getItem("globalDatabaseConnectionInformation"));
+                    var mock = Mockito.mock(ClientValidator.class);
+
+                    return mock;
+
                 }
         ));
 

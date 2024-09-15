@@ -10,27 +10,27 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
+
 @Component
 public class ApplicationLifeCycleListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger LOG = Logger.getLogger(ApplicationLifeCycleListener.class.getName());
-    private final RateLimiter rateLimiter;
-
-    @Autowired
-    public ApplicationLifeCycleListener(RateLimiter rateLimiter) {
-        this.rateLimiter = rateLimiter;
-    }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+
+        RateLimiter rateLimiter = (RateLimiter) iocContainer.getSingleton("rateLimiter");
+
         try {
-            this.rateLimiter.registerNewRateLimit("login", 5, RateLimitTimeUnit.MINUTE, 15);
-            this.rateLimiter.registerNewRateLimit("register", 5, RateLimitTimeUnit.MINUTE, 15);
-            this.rateLimiter.registerNewRateLimit("csrf", 5, RateLimitTimeUnit.MINUTE, 15);
+            rateLimiter.registerNewRateLimit("login", 5, RateLimitTimeUnit.MINUTE, 15);
+            rateLimiter.registerNewRateLimit("register", 5, RateLimitTimeUnit.MINUTE, 15);
+            rateLimiter.registerNewRateLimit("csrf", 5, RateLimitTimeUnit.MINUTE, 15);
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("Could not register rate-limiter: " + e.getMessage());
             throw new RuntimeException(e);
         }
+
     }
 
 

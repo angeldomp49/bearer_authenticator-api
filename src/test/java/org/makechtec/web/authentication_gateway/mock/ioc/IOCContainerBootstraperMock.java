@@ -1,23 +1,24 @@
-package org.makechtec.web.authentication_gateway.ioc;
+package org.makechtec.web.authentication_gateway.mock.ioc;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
-import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
+import org.makechtec.web.authentication_gateway.ioc.BeansDefinition;
+import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
-import java.util.Set;
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.globalContext;
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
 
 @Component
-public class IOCContainerBootstraper implements ApplicationListener<ApplicationStartedEvent> {
-
-    public static EnvironmentContext globalContext;
-    public static IOCContainer iocContainer;
+public class IOCContainerBootstraperMock implements ApplicationListener<ApplicationStartedEvent> {
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
@@ -27,15 +28,11 @@ public class IOCContainerBootstraper implements ApplicationListener<ApplicationS
 
         iocContainer = new IOCContainer(globalContext);
 
-        var beans = defineBeans();
 
-        iocContainer.registerAll(beans);
+
+        iocContainer.registerAll(BeansDefinitionMock.beans());
 
         iocContainer.instanciateSingletons();
-    }
-
-    public Set<BeanInformation> defineBeans() {
-        return BeansDefinition.beans();
     }
 
     private void initializeContext(EnvironmentContext context) {
