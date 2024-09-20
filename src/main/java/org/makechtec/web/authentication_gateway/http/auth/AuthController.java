@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping(
-            value = "client/login",
+            value = "/client/login",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
@@ -62,7 +62,7 @@ public class AuthController {
         context.setItem("clientUsername", username);
         context.setItem("clientPassword", password);
         context.setItem("csrfToken", xCsrfToken);
-        context.setItem("clientRateLimitTitle", "login");
+        context.setItem("clientRateLimitTitle", "auth.client.login");
 
         var possiblyErrorResponse =
                 requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/login")
@@ -76,7 +76,7 @@ public class AuthController {
         }
 
         var possiblyErrorInAction =
-                httpAsyncActionConfigurer.provideActions("adminControllerActions", "login")
+                httpAsyncActionConfigurer.provideActions("authControllerActions", "login")
                         .stream()
                         .parallel()
                         .peek(action -> action.perform(context))
@@ -99,40 +99,53 @@ public class AuthController {
 
     }
 
-    @GetMapping(value = "/check", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> checkToken(
+    @GetMapping(value = "/client/check", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> checkForClient(
             @RequestHeader("User-Agent") String clientAgent,
             @RequestHeader("Authorization") String authorization
     ) {
         var token = authorization.replace("Bearer ", "").trim();
 
-        try {
-            if (bearerAuthenticationFactory.jwtTokenHandler().isInBlackList(token)) {
-                var message =
-                        ObjectLeaftBuilder.builder()
-                                .put("isValid", false)
-                                .build();
+        var clientAddress = request.getRemoteAddr();
 
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
-            }
-        } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("message", "There was an error in the application")
-                            .build();
+        var context = new EnvironmentContext();
 
-            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        context.setItem("clientIP", clientAddress);
+        context.setItem("clientAgent", clientAgent);
+        context.setItem("clientRateLimitTitle", "auth.client.check");
+        context.setItem("clientJWTToken", token);
+
+        var possiblyErrorResponse =
+                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/check")
+                        .stream()
+                        .filter(validationFilter -> validationFilter.canPassRequest(context))
+                        .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorResponse.isPresent()) {
+            return possiblyErrorResponse.get().responseEntity();
         }
 
-        var isValidToken = bearerAuthenticationFactory.jwtTokenHandler().isValidSignature(token);
+        var possiblyErrorInAction =
+                httpAsyncActionConfigurer.provideActions("authControllerActions", "login")
+                        .stream()
+                        .parallel()
+                        .peek(action -> action.perform(context))
+                        .filter(action -> !action.hasSuccessfulFinished(context))
+                        .map(action -> action.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorInAction.isPresent()) {
+            return possiblyErrorInAction.get().responseEntity();
+        }
+
 
         var message =
                 ObjectLeaftBuilder.builder()
-                        .put("isValid", isValidToken)
+                        .put("isActiveSession", true)
                         .build();
 
-        return isValidToken ? new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK) :
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -159,7 +172,7 @@ public class AuthController {
     }
 
     @PostMapping(
-            value = "external-user/login",
+            value = "/external-user/login",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
@@ -183,7 +196,7 @@ public class AuthController {
         context.setItem("clientUsername", username);
         context.setItem("clientPassword", password);
         context.setItem("csrfToken", xCsrfToken);
-        context.setItem("clientRateLimitTitle", "login");
+        context.setItem("clientRateLimitTitle", "auth.external-user.login");
 
         var possiblyErrorResponse =
                 requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/login")
@@ -197,7 +210,7 @@ public class AuthController {
         }
 
         var possiblyErrorInAction =
-                httpAsyncActionConfigurer.provideActions("adminControllerActions", "login")
+                httpAsyncActionConfigurer.provideActions("authControllerActions", "login")
                         .stream()
                         .parallel()
                         .peek(action -> action.perform(context))
@@ -218,6 +231,65 @@ public class AuthController {
 
         return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
+    }
+
+    @PostMapping(value = "/external-user/check", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> checkForExternalUser(
+            @RequestHeader("User-Agent") String clientAgent,
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody String body
+    ) {
+
+        var jsonBody = new JSONObject(body);
+
+        var token = authorization.replace("Bearer ", "").trim();
+
+        var clientAddress = request.getRemoteAddr();
+
+        var context = new EnvironmentContext();
+
+        context.setItem("clientIP", clientAddress);
+        context.setItem("clientAgent", clientAgent);
+        context.setItem("clientRateLimitTitle", "auth.client.check");
+        context.setItem("clientJWTToken", token);
+
+
+        context.setItem("externalUserIP", jsonBody.getString("externalUserIP"));
+        context.setItem("externalUserAgent", jsonBody.getString("externalUserAgent"));
+        context.setItem("externalUserRateLimitTitle", "auth.external-user.check");
+        context.setItem("externalUserJWTToken", jsonBody.getString("externalUserJWTToken"));
+
+        var possiblyErrorResponse =
+                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/check")
+                        .stream()
+                        .filter(validationFilter -> validationFilter.canPassRequest(context))
+                        .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorResponse.isPresent()) {
+            return possiblyErrorResponse.get().responseEntity();
+        }
+
+        var possiblyErrorInAction =
+                httpAsyncActionConfigurer.provideActions("authControllerActions", "login")
+                        .stream()
+                        .parallel()
+                        .peek(action -> action.perform(context))
+                        .filter(action -> !action.hasSuccessfulFinished(context))
+                        .map(action -> action.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorInAction.isPresent()) {
+            return possiblyErrorInAction.get().responseEntity();
+        }
+
+
+        var message =
+                ObjectLeaftBuilder.builder()
+                        .put("isActiveSession", true)
+                        .build();
+
+        return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
 }
