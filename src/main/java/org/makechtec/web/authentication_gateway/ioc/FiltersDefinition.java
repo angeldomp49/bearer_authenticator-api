@@ -7,7 +7,11 @@ import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFacto
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.http.commons.filters.*;
+import org.makechtec.web.authentication_gateway.http.commons.filters.client.ClientWhiteListAsyncFilter;
+import org.makechtec.web.authentication_gateway.http.commons.filters.client.ClientCredentialsAsyncFilter;
+import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserCSRFTokenAsyncFilter;
+import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserCredentialsAsyncFilter;
+import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserRateLimitAsyncFilter;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 
 import java.util.HashSet;
@@ -26,7 +30,7 @@ public class FiltersDefinition {
                 args -> {
                     var container = (IOCContainer) args[1];
 
-                    return new UserRateLimitAsyncFilter(
+                    return new ExternalUserRateLimitAsyncFilter(
                             (RateLimiter) container.getSingleton("rateLimiter"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );
@@ -40,7 +44,7 @@ public class FiltersDefinition {
                 args -> {
                     var container = (IOCContainer) args[1];
 
-                    return new UserCredentialsAsyncFilter(
+                    return new ExternalUserCredentialsAsyncFilter(
                             (BearerAuthenticationFactory) container.getSingleton("bearerAuthenticationFactory"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );
@@ -68,7 +72,7 @@ public class FiltersDefinition {
                 args -> {
                     var container = (IOCContainer) args[1];
 
-                    return new ClientAddressAsyncFilter(
+                    return new ClientWhiteListAsyncFilter(
                             (ClientValidator) container.getSingleton("clientValidator"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );
@@ -82,7 +86,7 @@ public class FiltersDefinition {
                 args -> {
                     var container = (IOCContainer) args[1];
 
-                    return new CSRFTokenAsyncFilter(
+                    return new ExternalUserCSRFTokenAsyncFilter(
                             (CSRFTokenHandler) container.getSingleton("csrfTokenHandler"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );
@@ -96,7 +100,7 @@ public class FiltersDefinition {
                 args -> {
                     var container = (IOCContainer) args[1];
 
-                    return new ClientAddressAsyncFilter(
+                    return new ClientWhiteListAsyncFilter(
                             (ClientValidator) container.getSingleton("clientValidator"),
                             (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
                     );

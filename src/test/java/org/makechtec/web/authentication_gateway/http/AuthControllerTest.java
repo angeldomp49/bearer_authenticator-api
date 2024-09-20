@@ -49,7 +49,7 @@ class AuthControllerTest {
     @Test
     void loginByUserRequest() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenHandler.isValidCSRFToken(anyString(), anyString(), anyString(), anyString()))
@@ -92,7 +92,7 @@ class AuthControllerTest {
     @Test
     void loginByUserRequest_TooManyRequests() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(false);
 
         mvc.perform(
@@ -115,7 +115,7 @@ class AuthControllerTest {
     @Test
     void loginByUserRequest_unauthorized() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenHandler.isValidCSRFToken(anyString(), anyString(), anyString(), anyString()))
@@ -141,7 +141,7 @@ class AuthControllerTest {
     @Test
     void loginByUserRequest_unauthorizedInvalidCredentials() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenHandler.isValidCSRFToken(anyString(), anyString(), anyString(), anyString()))
@@ -178,7 +178,7 @@ class AuthControllerTest {
     @Test
     void loginByUserRequest_sqlException() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenThrow(new SQLException());
 
         mvc.perform(

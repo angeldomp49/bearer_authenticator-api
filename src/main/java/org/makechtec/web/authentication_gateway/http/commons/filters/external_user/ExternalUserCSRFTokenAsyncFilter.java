@@ -1,0 +1,69 @@
+package org.makechtec.web.authentication_gateway.http.commons.filters.external_user;
+
+import org.makechtec.software.ioc_container.env.EnvironmentContext;
+import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
+import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.filtering.RequestValidationAsyncFilter;
+import org.makechtec.web.authentication_gateway.filtering.ValidationFailedResponse;
+import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult;
+import org.makechtec.web.authentication_gateway.http.commons.filters.client.ClientCSRFTokenAsyncFilter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.sql.SQLException;
+
+import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.DATABASE_CONNECTION_ERROR;
+import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.SUCCESS;
+
+public class ExternalUserCSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
+
+    private final CSRFTokenHandler csrfTokenHandler;
+    private final CommonResponseBuilder commonResponseBuilder;
+    private CommonFilterResult result;
+
+    public ExternalUserCSRFTokenAsyncFilter(CSRFTokenHandler csrfTokenHandler, CommonResponseBuilder commonResponseBuilder) {
+        this.csrfTokenHandler = csrfTokenHandler;
+        this.commonResponseBuilder = commonResponseBuilder;
+    }
+
+    @Override
+    public boolean canPassRequest(EnvironmentContext context) {
+        try {
+
+            var csrfToken = (String) context.getItem("externalUserCSRFToken");
+
+            var validationResult =
+                    this.csrfTokenHandler.isValidCSRFToken(
+                            (String) context.getItem("externalUserIP"),
+                            (String) context.getItem("externalUserAgent"),
+                            csrfToken
+                    );
+
+            csrfTokenHandler.deleteCSRFToken(csrfToken);
+
+            result = SUCCESS;
+
+            return validationResult;
+        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            result = DATABASE_CONNECTION_ERROR;
+            return false;
+        }
+    }
+
+    @Override
+    public ValidationFailedResponse createFailedResponse(EnvironmentContext context) {
+
+        if (result == DATABASE_CONNECTION_ERROR) {
+            return commonResponseBuilder.createDatabaseErrorResponse("Error connecting to the database", ClientCSRFTokenAsyncFilter.class);
+        }
+
+        return commonResponseBuilder.createErrorResponse(
+                "Unauthorized the CSRF token is invalid",
+                HttpStatus.UNAUTHORIZED,
+                ClientCSRFTokenAsyncFilter.class
+        );
+
+    }
+
+}

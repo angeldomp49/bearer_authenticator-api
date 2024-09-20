@@ -18,7 +18,7 @@ public class CSRFTokenHandler {
     }
 
 
-    public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void registerCSRFToken(String userIP, String userAgent, long expirationDate, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
 
         try {
@@ -26,12 +26,11 @@ public class CSRFTokenHandler {
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.csrf_tokens(end_user_ip, user_agent, client_ip, expiration_date, token)
+                            INSERT INTO atepoztli__authentication_service__schema.csrf_tokens(user_ip, user_agent, expiration_date, token)
                             VALUES(?,?,?,?,?);
                             """)
                     .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                    .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                     .addParamAtPosition(4, expirationDate, ParamType.TYPE_LONG)
                     .addParamAtPosition(5, token, ParamType.TYPE_STRING)
                     .update();
@@ -43,34 +42,7 @@ public class CSRFTokenHandler {
 
     }
 
-    public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, long userId, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-
-
-        try {
-
-            new WithPoolEngine<Void>(connectionPool)
-                    .isPrepared()
-                    .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.csrf_tokens(end_user_ip, user_agent, client_ip, expiration_date, user_id, token)
-                            VALUES(?,?,?,?,?,?);
-                            """)
-                    .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
-                    .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                    .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
-                    .addParamAtPosition(4, expirationDate, ParamType.TYPE_STRING)
-                    .addParamAtPosition(5, userId, ParamType.TYPE_LONG)
-                    .addParamAtPosition(6, token, ParamType.TYPE_STRING)
-                    .update();
-
-        } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering csrf token in database");
-            e.printStackTrace();
-            throw e;
-        }
-
-    }
-
-    public boolean isValidCSRFToken(String userIP, String userAgent, String clientIP, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public boolean isValidCSRFToken(String userIP, String userAgent, String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         try {
             return
@@ -79,15 +51,13 @@ public class CSRFTokenHandler {
                             .queryString("""
                                     SELECT COUNT(*) AS result
                                     FROM atepoztli__authentication_service__schema.csrf_tokens
-                                    WHERE end_user_ip = ?
+                                    WHERE user_ip = ?
                                     AND user_agent = ?
-                                    AND client_ip = ?
                                     AND token = ?
                                     AND expiration_date > ?;
                                     """)
                             .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                             .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                            .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                             .addParamAtPosition(4, token, ParamType.TYPE_STRING)
                             .addParamAtPosition(5, Calendar.getInstance().getTimeInMillis(), ParamType.TYPE_LONG)
                             .run(resultSet -> {

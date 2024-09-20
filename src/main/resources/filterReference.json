@@ -15,6 +15,9 @@
       "params": [
         "clientUsername",
         "clientPassword"
+      ],
+      "output": [
+        "clientCredentialsAsyncFilter.jwtToken"
       ]
     },
     {
@@ -27,7 +30,7 @@
       ]
     },
     {
-      "beanId": "whiteListAsyncFilter",
+      "beanId": "clientWhiteListAsyncFilter",
       "scope": "singleton",
       "params": [
         "clientIP",
@@ -56,10 +59,13 @@
       "params": [
         "externalUserUsername",
         "externaleUserPassword"
+      ],
+      "output": [
+        "externalUserCredentialsAsyncFilter.jwtToken"
       ]
     },
     {
-      "beanId": "userRateLimitAsyncFilter",
+      "beanId": "externalUserRateLimitAsyncFilter",
       "scope": "singleton",
       "params": [
         "externalUserIP",

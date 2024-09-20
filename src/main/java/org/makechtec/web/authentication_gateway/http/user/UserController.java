@@ -56,11 +56,11 @@ public class UserController {
         var token = authorization.replace("Bearer ", "").trim();
         try {
 
-            if (!this.rateLimiter.hasAttemptsThisClient(userIP, userAgent, clientAddress, "csrf")) {
+            if (!this.rateLimiter.hasAttemptsThisUser(userIP, userAgent, clientAddress, "csrf")) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
-            this.rateLimiter.pushAttemptToThisClient(userIP, userAgent, clientAddress);
+            this.rateLimiter.pushAttemptToThisUser(userIP, userAgent);
 
             if (!this.csrfTokenHandler.isValidCSRFToken(userIP, userAgent, clientAddress, xCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

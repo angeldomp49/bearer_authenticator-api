@@ -3,23 +3,23 @@
     "clientCSRFTokenAsyncFilter",
     "clientCredentialsAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ],
   "client/check": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ],
   "client/logout": [
     "clientCSRFTokenAsyncFilter",
     "clientJWTAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ],
   "external-user/login": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userCSRFTokenAsyncFilter",
     "userCredentialsAsyncFilter",
     "userRateLimitAsyncFilter"
@@ -27,14 +27,14 @@
   "external-user/check": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userJWTTokenAsyncFilter",
     "userRateLimitAsyncFilter"
   ],
   "external-user/logout": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userCSRFTokenAsyncFilter",
     "userJWTTokenAsyncFilter",
     "userRateLimitAsyncFilter"

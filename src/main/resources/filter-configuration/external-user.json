@@ -2,7 +2,7 @@
   "register": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userCSRFTokenAsyncFilter",
     "userRateLimitAsyncFilter",
     "userRegistrationAsyncFilter"
@@ -10,14 +10,14 @@
   "show": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userJWTTokenAsyncFilter",
     "userRateLimitAsyncFilter"
   ],
   "delete": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "userJWTTokenAsyncFilter",
     "userRateLimitAsyncFilter",
     "userCSRFTokenAsyncFilter"

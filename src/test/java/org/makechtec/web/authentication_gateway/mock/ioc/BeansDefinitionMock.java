@@ -137,12 +137,12 @@ public class BeansDefinitionMock {
                         }
 
                         @Override
-                        public boolean hasAttemptsThisClient(String a, String b, String c, String d) {
+                        public boolean hasAttemptsThisUser(String a, String b, String c, String d) {
                             return true;
                         }
 
                         @Override
-                        public void pushAttemptToThisClient(String a, String b, String c) {
+                        public void pushAttemptToThisUser(String a, String b) {
 
                         }
 

@@ -1,10 +1,10 @@
 {
   "client": [
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "clientRateLimitAsyncFilter"
   ],
   "external-user": [
-    "whiteListAsyncFilter",
+    "clientWhiteListAsyncFilter",
     "clientRateLimitAsyncFilter",
     "clientJWTAsyncFilter",
     "userRateLimitAsyncFilter"

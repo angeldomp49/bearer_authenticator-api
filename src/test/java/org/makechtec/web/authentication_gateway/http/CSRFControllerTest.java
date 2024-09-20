@@ -53,7 +53,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -81,7 +81,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_hasAttemptsFalse() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(false);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -109,7 +109,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_clientNotAllowed() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -137,7 +137,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_hasAttemptsThisClient_sqlException() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenThrow(new SQLException());
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -165,7 +165,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_isAllowedClient_sqlException() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -193,7 +193,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_isAllowedClient_nullPointerException() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -220,7 +220,7 @@ class CSRFControllerTest {
     @Test
     void generateCSRFTokenForClient_pushAttemptClient_sqlException() throws Exception {
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())
@@ -230,7 +230,7 @@ class CSRFControllerTest {
                 .thenReturn(true);
 
         doThrow(new SQLException())
-                .when(rateLimiter).pushAttemptToThisClient(anyString(), anyString(), anyString());
+                .when(rateLimiter).pushAttemptToThisUser(anyString(), anyString());
 
         mockMvc.perform(
                         post("/csrf/client/public")
@@ -256,7 +256,7 @@ class CSRFControllerTest {
         doThrow(new SQLException())
                 .when(csrfTokenHandler).registerCSRFToken(anyString(), anyString(), anyString(), anyLong(), anyString());
 
-        when(rateLimiter.hasAttemptsThisClient(anyString(), anyString(), anyString(), anyString()))
+        when(rateLimiter.hasAttemptsThisUser(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
 
         when(csrfTokenGenerator.generateCSRFToken())

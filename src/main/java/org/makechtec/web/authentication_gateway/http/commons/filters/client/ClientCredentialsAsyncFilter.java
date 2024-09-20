@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http.commons.filters;
+package org.makechtec.web.authentication_gateway.http.commons.filters.client;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
@@ -6,18 +6,19 @@ import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFacto
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationAsyncFilter;
 import org.makechtec.web.authentication_gateway.filtering.ValidationFailedResponse;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
 
+import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.*;
+
 public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilter {
 
-    private static final int RESULT_SUCCESS = 1;
-    private static final int RESULT_FAILED_SQL_CONNECTION = 2;
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final CommonResponseBuilder commonResponseBuilder;
-    private int result;
+    private CommonFilterResult result;
 
     public ClientCredentialsAsyncFilter(BearerAuthenticationFactory bearerAuthenticationFactory, CommonResponseBuilder commonResponseBuilder) {
         this.bearerAuthenticationFactory = bearerAuthenticationFactory;
@@ -34,36 +35,36 @@ public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilte
                             (String) context.getItem("clientPassword")
                     );
 
-            result = RESULT_SUCCESS;
-            return validationResult;
+            if(!validationResult){
+                result = UNAUTHORIZED;
+                return false;
+            }
+
+            var session = bearerAuthenticationFactory.sessionGenerator().createForUser((String) context.getItem("username"));
+
+            var token = bearerAuthenticationFactory.jwtTokenHandler().createTokenForSession(session);
+
+            context.setItem("clientCredentialsAsyncFilter.jwtToken", token);
+
+            result = SUCCESS;
+            return true;
         } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-            result = RESULT_FAILED_SQL_CONNECTION;
+            result = DATABASE_CONNECTION_ERROR;
             return false;
         }
     }
 
     @Override
     public ValidationFailedResponse createFailedResponse(EnvironmentContext context) {
-        if (result == RESULT_FAILED_SQL_CONNECTION) {
-            var message =
-                    ObjectLeaftBuilder.builder()
-                            .put("message", "Error connecting to the database")
-                            .build();
 
-            return new ValidationFailedResponse(
-                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
-                    ClientCredentialsAsyncFilter.class.getName()
-            );
+        if (result == DATABASE_CONNECTION_ERROR) {
+            return commonResponseBuilder.createDatabaseErrorResponse("Error connecting to the database", ClientRateLimitAsyncFilter.class);
         }
 
-        var message =
-                ObjectLeaftBuilder.builder()
-                        .put("message", "Username or password are invalid for client")
-                        .build();
-
-        return new ValidationFailedResponse(
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED),
-                ClientCredentialsAsyncFilter.class.getName()
+        return commonResponseBuilder.createErrorResponse(
+                "Username or password are invalid for client",
+                HttpStatus.UNAUTHORIZED,
+                ClientRateLimitAsyncFilter.class
         );
     }
 

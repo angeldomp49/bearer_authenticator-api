@@ -38,7 +38,7 @@ public class RateLimiter {
         }
     }
 
-    public boolean hasAttemptsThisClient(String userIP, String userAgent, String clientIP, String rateLimitTitle) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public boolean hasAttemptsThisUser(String userIP, String userAgent, String rateLimitTitle) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
 
             var totalOfAttemptsAvailable =
@@ -67,7 +67,6 @@ public class RateLimiter {
                     FROM atepoztli__authentication_service__schema.client_attempts
                     WHERE user_ip = ?
                     AND user_agent = ?
-                    AND client_ip = ?
                     AND created_at >= (NOW() - INTERVAL '${filter}');
                     """.replace("${filter}", beforeLimitFilter);
 
@@ -77,7 +76,6 @@ public class RateLimiter {
                             .queryString(queryWithTimeFilter)
                             .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                             .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                            .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                             .run(resultSet -> {
                                 resultSet.next();
 
@@ -132,18 +130,17 @@ public class RateLimiter {
         return (currentAttempts + 1) < allowedAttempts;
     }
 
-    public void pushAttemptToThisClient(String userIP, String userAgent, String clientIP) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void pushAttemptToThisUser(String userIP, String userAgent) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
 
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.client_attempts(user_ip, user_agent, client_ip, created_at)
+                            INSERT INTO atepoztli__authentication_service__schema.client_attempts(user_ip, user_agent, created_at)
                             VALUES(?,?,?, NOW());
                             """)
                     .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, userAgent, ParamType.TYPE_STRING)
-                    .addParamAtPosition(3, clientIP, ParamType.TYPE_STRING)
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {

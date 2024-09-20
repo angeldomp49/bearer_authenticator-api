@@ -3,17 +3,17 @@
     "clientCSRFTokenAsyncFilter",
     "clientCredentialsAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ],
   "check": [
     "clientJWTTokenAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ],
   "logout": [
     "clientCSRFTokenAsyncFilter",
     "clientJWTAsyncFilter",
     "clientRateLimitAsyncFilter",
-    "whiteListAsyncFilter"
+    "clientWhiteListAsyncFilter"
   ]
 }
