@@ -1,0 +1,9 @@
+{
+  "register": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "clientWhiteListAsyncFilter",
+    "userCSRFTokenAsyncFilter",
+    "userRateLimitAsyncFilter"
+  ]
+}

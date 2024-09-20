@@ -56,12 +56,12 @@ public class BeansDefinitionMock {
                         }
 
                         @Override
-                        public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, String token) {
+                        public void registerCSRFToken(String userIP, String userAgent, long expirationDate, String token) {
 
                         }
 
                         @Override
-                        public boolean isValidCSRFToken(String userIP, String userAgent, String clientIP, String token) {
+                        public boolean isValidCSRFToken(String userIP, String userAgent, String token) {
                             return true;
                         }
 
@@ -137,7 +137,7 @@ public class BeansDefinitionMock {
                         }
 
                         @Override
-                        public boolean hasAttemptsThisUser(String a, String b, String c, String d) {
+                        public boolean hasAttemptsThisUser(String a, String b, String d) {
                             return true;
                         }
 

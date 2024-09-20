@@ -43,7 +43,6 @@ public class GenerateCSRFTokenAction implements HttpAsyncAction {
             this.csrfTokenHandler.registerCSRFToken(
                     (String) context.getItem("userIP"),
                     (String) context.getItem("userAgent"),
-                    (String) context.getItem("userIP"),
                     expirationDate.getTimeInMillis(),
                     csrfToken
             );

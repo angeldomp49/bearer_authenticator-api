@@ -45,7 +45,7 @@
       ]
     },
     {
-      "beanId": "userCSRFTokenAsyncFilter",
+      "beanId": "externalUserCSRFTokenAsyncFilter",
       "scope": "singleton",
       "params": [
         "externalUserIP",
@@ -54,7 +54,7 @@
       ]
     },
     {
-      "beanId": "userCredentialsAsyncFilter",
+      "beanId": "externalUserCredentialsAsyncFilter",
       "scope": "singleton",
       "params": [
         "externalUserUsername",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "beanId": "userJWTTokenAsyncFilter",
+      "beanId": "externalUserJWTTokenAsyncFilter",
       "scope": "singleton",
       "params": [
         "externalUserJWTToken"
