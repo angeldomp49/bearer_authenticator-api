@@ -4,13 +4,13 @@ import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Set;
 
 @Component
@@ -18,9 +18,21 @@ public class IOCContainerBootstraper implements ApplicationListener<ApplicationS
 
     public static EnvironmentContext globalContext;
     public static IOCContainer iocContainer;
+    private final ConnectionPool connectionPool;
+
+    public IOCContainerBootstraper(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+    }
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
+
+        try {
+            connectionPool.boot();
+        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
         globalContext = new EnvironmentContext();
 
         initializeContext(globalContext);

@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.admin;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 import org.makechtec.web.authentication_gateway.bearer.user.User;
 
@@ -12,11 +12,12 @@ import java.util.logging.Logger;
 public class AdminDBConnector {
 
     private static final Logger LOG = Logger.getLogger(AdminDBConnector.class.getName());
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public AdminDBConnector(ConnectionInformation connectionInformation) {
-        this.connectionInformation = connectionInformation;
+    public AdminDBConnector(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
+
 
     public boolean areValidCredentials(String username, String password) {
         Optional<User> user;
@@ -33,7 +34,7 @@ public class AdminDBConnector {
     public Optional<User> getUser(String username) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
-                    new PostgresEngine<Optional<User>>(connectionInformation)
+                    new WithPoolEngine<Optional<User>>(connectionPool)
                             .queryString("""
                                     SELECT id, username, hashed_password
                                     FROM atepoztli__authentication_service__schema.users

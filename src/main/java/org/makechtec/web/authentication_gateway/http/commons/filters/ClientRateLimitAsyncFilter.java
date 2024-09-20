@@ -54,7 +54,8 @@ public class ClientRateLimitAsyncFilter implements RequestValidationAsyncFilter 
                             .build();
 
             return new ValidationFailedResponse(
-                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
+                    ClientRateLimitAsyncFilter.class.getName()
             );
         }
 
@@ -64,7 +65,8 @@ public class ClientRateLimitAsyncFilter implements RequestValidationAsyncFilter 
                         .build();
 
         return new ValidationFailedResponse(
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS)
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS),
+                ClientRateLimitAsyncFilter.class.getName()
         );
     }
 

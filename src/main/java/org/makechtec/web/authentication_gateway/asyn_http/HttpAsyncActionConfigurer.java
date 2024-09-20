@@ -35,7 +35,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
 
         var jsonContent = (JSONObject) IOCContainerBootstraper.globalContext.getItem(sanitizedConfigurationJSON);
 
-        var filters = new HashSet<HttpAsyncAction>();
+        var actions = new HashSet<HttpAsyncAction>();
 
         JSONArray jsonFilterList = jsonContent.getJSONArray(actionName.trim());
 
@@ -46,18 +46,18 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
             var scope = findJsonObjectByBeanId(beanId).getString("scope");
 
             if (scope.trim().equals("singleton")) {
-                filters.add(
+                actions.add(
                         (HttpAsyncAction) IOCContainerBootstraper.iocContainer.getSingleton(beanId)
                 );
             } else {
-                filters.add(
+                actions.add(
                         (HttpAsyncAction) IOCContainerBootstraper.iocContainer.getPrototype(beanId)
                 );
             }
 
         }
 
-        return filters;
+        return actions;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
         var jsonConfigurationLoader = (JSONConfigurationLoader) IOCContainerBootstraper.iocContainer.getSingleton("jsonConfigurationLoader");
         var jsonConfiguration = jsonConfigurationLoader.loadConfiguration(referenceFile);
 
-        context.setItem(HTTP_ASYNC_ACTION_REFERENCE_FILENAME + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX, jsonConfiguration);
+        context.setItem(HTTP_ASYNC_ACTION_REFERENCE_FILENAME.replace(".json", "") + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX, jsonConfiguration);
 
         var filterDirectoryURL = RequestValidationFilterConfigurer.class.getClassLoader().getResource(HTTP_ASYNC_ACTION_CONFIGURATION_DIRECTORY);
 
@@ -97,15 +97,15 @@ public class HttpAsyncActionConfigurer implements ApplicationListener<Applicatio
         Arrays.stream(filterDirectory.listFiles())
                 .forEach(file -> {
                     var jsonContent = jsonConfigurationLoader.loadConfiguration(file);
-                    context.setItem(file.getName() + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX, jsonContent);
+                    context.setItem(file.getName().replace(".json", "") + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX, jsonContent);
                 });
 
     }
 
     private JSONObject findJsonObjectByBeanId(String beanId) {
-        var filterReferenceJson = (JSONObject) IOCContainerBootstraper.globalContext.getItem(HTTP_ASYNC_ACTION_REFERENCE_JSON);
+        var actionReferenceJson = (JSONObject) IOCContainerBootstraper.globalContext.getItem(HTTP_ASYNC_ACTION_REFERENCE_FILENAME.replace(".json", "") + HTTP_ASYNC_ACTION_CONFIGURATION_JSON_SUFFIX);
 
-        JSONArray filters = filterReferenceJson.getJSONArray("filters");
+        JSONArray filters = actionReferenceJson.getJSONArray("actions");
 
         for (int i = 0; i < filters.length(); i++) {
             var filterObject = filters.getJSONObject(i);

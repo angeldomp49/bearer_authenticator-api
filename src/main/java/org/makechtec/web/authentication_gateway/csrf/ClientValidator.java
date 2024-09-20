@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.csrf;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
@@ -11,16 +11,17 @@ public class ClientValidator {
 
     private static final Logger LOG = Logger.getLogger(ClientValidator.class.getName());
 
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public ClientValidator(ConnectionInformation connectionInformation) {
-        this.connectionInformation = connectionInformation;
+    public ClientValidator(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
+
 
     public boolean isAllowedClient(String ip) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
-                    new PostgresEngine<Boolean>(connectionInformation)
+                    new WithPoolEngine<Boolean>(connectionPool)
                             .isPrepared()
                             .queryString("""
                                     SELECT COUNT(*) AS result

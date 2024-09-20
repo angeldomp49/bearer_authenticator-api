@@ -1,6 +1,8 @@
 package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
 import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.postgres.PostgresPooledConnectionCreator;
 import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
@@ -21,7 +23,7 @@ public class ServiceProvider {
     @Bean
     public BearerAuthenticationFactory bearerAuthenticationFactory() {
         return new BearerAuthenticationFactory(
-                connectionInformation(),
+                connectionPool(),
                 new SignaturePrinter(this.crypographyInformation().getSecretKey()),
                 passwordHasher());
     }
@@ -45,7 +47,7 @@ public class ServiceProvider {
 
     @Bean
     public UserDBConnection userDBConnection() {
-        return new UserDBConnection(connectionInformation());
+        return new UserDBConnection(connectionPool());
     }
 
     @Bean
@@ -60,13 +62,13 @@ public class ServiceProvider {
 
     @Bean
     public ClientValidator clientValidator() {
-        return new ClientValidator(this.connectionInformation());
+        return new ClientValidator(this.connectionPool());
     }
 
     @Bean
     public CSRFTokenHandler csrfTokenHandler() {
         return new CSRFTokenHandler(
-                this.connectionInformation()
+                this.connectionPool()
         );
     }
 
@@ -77,7 +79,7 @@ public class ServiceProvider {
 
     @Bean
     public RateLimiter rateLimiter() {
-        return new RateLimiter(this.connectionInformation());
+        return new RateLimiter(this.connectionPool());
     }
 
     @Bean
@@ -85,5 +87,9 @@ public class ServiceProvider {
         return new CommonResponseBuilder();
     }
 
+    @Bean
+    public ConnectionPool connectionPool() {
+        return new ConnectionPool(Runtime.getRuntime().availableProcessors(), new PostgresPooledConnectionCreator(connectionInformation()));
+    }
 
 }

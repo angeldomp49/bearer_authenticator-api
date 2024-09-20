@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http;
+package org.makechtec.web.authentication_gateway.http.csrf;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("csrf")
@@ -31,7 +29,11 @@ public class CSRFController {
     }
 
 
-    @PostMapping(value = "/client", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(
+            value = "/client",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<String> generateCSRFTokenForClient(
             @RequestHeader("User-Agent") String userAgent,
             HttpServletRequest request

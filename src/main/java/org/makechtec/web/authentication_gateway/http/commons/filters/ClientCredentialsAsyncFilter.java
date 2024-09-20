@@ -51,7 +51,8 @@ public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilte
                             .build();
 
             return new ValidationFailedResponse(
-                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
+                    ClientCredentialsAsyncFilter.class.getName()
             );
         }
 
@@ -61,7 +62,8 @@ public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilte
                         .build();
 
         return new ValidationFailedResponse(
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED)
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED),
+                ClientCredentialsAsyncFilter.class.getName()
         );
     }
 

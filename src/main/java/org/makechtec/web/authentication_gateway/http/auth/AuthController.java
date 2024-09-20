@@ -39,6 +39,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> loginByUserRequest(
+            @RequestHeader("User-Agent") String clientAgent,
             @RequestHeader("Authorization") String authorization,
             @RequestBody String body
     ) {
@@ -98,7 +99,10 @@ public class AuthController {
     }
 
     @GetMapping(value = "/check", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> checkToken(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<String> checkToken(
+            @RequestHeader("User-Agent") String clientAgent,
+            @RequestHeader("Authorization") String authorization
+    ) {
         var token = authorization.replace("Bearer ", "").trim();
 
         try {
@@ -131,7 +135,10 @@ public class AuthController {
     }
 
     @DeleteMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<String> logout(
+            @RequestHeader("User-Agent") String clientAgent,
+            @RequestHeader("Authorization") String authorization
+    ) {
 
         var token = authorization.replace("Bearer ", "").trim();
 

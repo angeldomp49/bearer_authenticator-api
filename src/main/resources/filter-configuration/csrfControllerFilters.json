@@ -1,6 +1,12 @@
 {
   "client": [
-    "clientAddressFilter",
-    "clientRateLimitFilter"
+    "whiteListAsyncFilter",
+    "clientRateLimitAsyncFilter"
+  ],
+  "external-user": [
+    "whiteListAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "clientJWTAsyncFilter",
+    "userRateLimitAsyncFilter"
   ]
 }

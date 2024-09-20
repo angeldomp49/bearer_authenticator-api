@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.csrf;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
@@ -11,10 +11,10 @@ import java.util.logging.Logger;
 public class CSRFTokenHandler {
 
     private static final Logger LOG = Logger.getLogger(CSRFTokenHandler.class.getName());
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public CSRFTokenHandler(ConnectionInformation connectionInformation) {
-        this.connectionInformation = connectionInformation;
+    public CSRFTokenHandler(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
 
@@ -23,7 +23,7 @@ public class CSRFTokenHandler {
 
         try {
 
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.csrf_tokens(end_user_ip, user_agent, client_ip, expiration_date, token)
@@ -48,7 +48,7 @@ public class CSRFTokenHandler {
 
         try {
 
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.csrf_tokens(end_user_ip, user_agent, client_ip, expiration_date, user_id, token)
@@ -74,7 +74,7 @@ public class CSRFTokenHandler {
 
         try {
             return
-                    new PostgresEngine<Boolean>(connectionInformation)
+                    new WithPoolEngine<Boolean>(connectionPool)
                             .isPrepared()
                             .queryString("""
                                     SELECT COUNT(*) AS result
@@ -105,7 +105,7 @@ public class CSRFTokenHandler {
 
     public void deleteCSRFToken(String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             DELETE FROM atepoztli__authentication_service__schema.csrf_tokens

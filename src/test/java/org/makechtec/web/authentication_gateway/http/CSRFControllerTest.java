@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
+import org.makechtec.web.authentication_gateway.http.csrf.CSRFController;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

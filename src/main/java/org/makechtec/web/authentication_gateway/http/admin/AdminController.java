@@ -28,7 +28,11 @@ public class AdminController {
         this.commonResponseBuilder = commonResponseBuilder;
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(
+            value = "/login",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<String> login(
             @RequestHeader("User-Agent") String userAgent,
             @RequestHeader("X-Csrf-Token") String xCsrfToken,
@@ -42,11 +46,13 @@ public class AdminController {
         var context = new EnvironmentContext();
 
         context.setItem("userIP", userIP);
+        context.setItem("userAddress", userIP);
+        context.setItem("clientAddress", userIP);
         context.setItem("userAgent", userAgent);
         context.setItem("csrfToken", xCsrfToken);
         context.setItem("username", jsonBody.getString("username"));
         context.setItem("password", jsonBody.getString("password"));
-        context.setItem("rateLimitTitle", "login");
+        context.setItem("userRateLimitTitle", "login");
 
         var possiblyErrorResponse =
                 requestValidationFilterConfigurer.provideFilters("adminControllerFilters", "login")
@@ -59,6 +65,7 @@ public class AdminController {
                         .findFirst();
 
         if (possiblyErrorResponse.isPresent()) {
+            System.err.println(possiblyErrorResponse.get().filterCause());
             return possiblyErrorResponse.get().responseEntity();
         }
 
@@ -72,6 +79,7 @@ public class AdminController {
                         .findFirst();
 
         if (possiblyErrorInAction.isPresent()) {
+
             return possiblyErrorInAction.get().responseEntity();
         }
 

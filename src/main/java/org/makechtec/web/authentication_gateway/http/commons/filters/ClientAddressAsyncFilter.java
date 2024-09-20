@@ -47,7 +47,8 @@ public class ClientAddressAsyncFilter implements RequestValidationAsyncFilter {
                             .build();
 
             return new ValidationFailedResponse(
-                    new ResponseEntity<>(responseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                    new ResponseEntity<>(responseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
+                    ClientAddressAsyncFilter.class.getName()
             );
         }
 
@@ -56,7 +57,8 @@ public class ClientAddressAsyncFilter implements RequestValidationAsyncFilter {
                         .put("message", "Unauthorized this client is not allowed to do requests")
                         .build();
         return new ValidationFailedResponse(
-                new ResponseEntity<>(responseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED)
+                new ResponseEntity<>(responseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED),
+                ClientAddressAsyncFilter.class.getName()
         );
 
     }

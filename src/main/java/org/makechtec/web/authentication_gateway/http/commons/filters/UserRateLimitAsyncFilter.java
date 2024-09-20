@@ -30,11 +30,11 @@ public class UserRateLimitAsyncFilter implements RequestValidationAsyncFilter {
 
         try {
             var validationResult =
-                    !this.rateLimiter.hasAttemptsThisClient(
+                    this.rateLimiter.hasAttemptsThisClient(
                             (String) context.getItem("userIP"),
                             (String) context.getItem("userAgent"),
                             (String) context.getItem("userAddress"),
-                            (String) context.getItem("uaerRateLimitTitle")
+                            (String) context.getItem("userRateLimitTitle")
                     );
 
             result = RESULT_SUCCESS;
@@ -57,7 +57,8 @@ public class UserRateLimitAsyncFilter implements RequestValidationAsyncFilter {
                             .build();
 
             return new ValidationFailedResponse(
-                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
+                    UserRateLimitAsyncFilter.class.getName()
             );
         }
 
@@ -67,7 +68,8 @@ public class UserRateLimitAsyncFilter implements RequestValidationAsyncFilter {
                         .build();
 
         return new ValidationFailedResponse(
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS)
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS),
+                UserRateLimitAsyncFilter.class.getName()
         );
 
     }

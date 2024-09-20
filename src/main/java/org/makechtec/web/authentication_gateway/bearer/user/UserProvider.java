@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.bearer.user;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
@@ -11,16 +11,16 @@ import java.util.logging.Logger;
 public class UserProvider {
 
     private static final Logger LOG = Logger.getLogger(UserProvider.class.getName());
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public UserProvider(ConnectionInformation connectionInformation) {
-        this.connectionInformation = connectionInformation;
+    public UserProvider(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     public Optional<User> byUsername(String username) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
-                    new PostgresEngine<Optional<User>>(connectionInformation)
+                    new WithPoolEngine<Optional<User>>(connectionPool)
                             .queryString("""
                                     SELECT id, username, hashed_password
                                     FROM atepoztli__authentication_service__schema.users

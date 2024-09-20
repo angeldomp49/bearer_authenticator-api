@@ -1,16 +1,20 @@
 package org.makechtec.web.authentication_gateway.http;
 
 import org.junit.jupiter.api.Test;
+import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.bearer.JWTTokenHandler;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionGenerator;
 import org.makechtec.web.authentication_gateway.bearer.user.UserAuthenticator;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
+import org.makechtec.web.authentication_gateway.mock.ioc.MockConfiguration;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(MockConfiguration.class)
 class AuthControllerTest {
 
     @Autowired
@@ -37,6 +42,9 @@ class AuthControllerTest {
 
     @MockBean
     private BearerAuthenticationFactory bearerAuthenticationFactory;
+
+    @MockBean
+    private IOCContainerBootstraper iocContainerBootstraper;
 
     @Test
     void loginByUserRequest() throws Exception {
@@ -60,12 +68,17 @@ class AuthControllerTest {
 
         mvc.perform(
                         post("/auth/login")
-                                .header("User-Address", "127.0.0.1")
-                                .header("User-Agent", "test")
-                                .header("Client-Address", "127.0.0.1")
-                                .header("X-Csrf-Token", "Bearer test")
-                                .param("username", "test")
-                                .param("password", "test")
+                                .header("Authorization", "test")
+                                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .content(ObjectLeaftBuilder.builder()
+                                        .put("userAgent", "test")
+                                        .put("userAddress", "test")
+                                        .put("csrfToken", "test")
+                                        .put("username", "test")
+                                        .put("password", "test")
+                                        .build()
+                                        .getLeafValue()
+                                )
                 )
                 .andDo(print())
                 .andExpect(status().isCreated())

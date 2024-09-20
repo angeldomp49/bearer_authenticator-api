@@ -1,45 +1,77 @@
 {
   "filters": [
     {
-      "beanId": "csrfTokenFilter",
+      "beanId": "clientCSRFTokenAsyncFilter",
       "scope": "singleton",
       "params": [
-        "userIP",
-        "userAgent",
-        "csrfToken"
+        "clientIP",
+        "clientAgent",
+        "clientCSRFToken"
       ]
     },
     {
-      "beanId": "userCredentialsFilter",
+      "beanId": "clientCredentialsAsyncFilter",
       "scope": "singleton",
       "params": [
-        "username",
-        "password"
+        "clientUsername",
+        "clientPassword"
       ]
     },
     {
-      "beanId": "userRateLimitFilter",
+      "beanId": "clientRateLimitAsyncFilter",
       "scope": "singleton",
       "params": [
-        "userIP",
-        "userAgent",
-        "userRateLimitTitle"
-      ]
-    },
-    {
-      "beanId": "clientRateLimitFilter",
-      "scope": "singleton",
-      "params": [
-        "clientAddress",
+        "clientIP",
         "clientAgent",
         "clientRateLimitTitle"
       ]
     },
     {
-      "beanId": "clientAddressFilter",
+      "beanId": "whiteListAsyncFilter",
       "scope": "singleton",
       "params": [
-        "clientAddress"
+        "clientIP",
+        "clientAgent"
+      ]
+    },
+    {
+      "beanId": "clientJWTTokenAsyncFilter",
+      "scope": "singleton",
+      "params": [
+        "clientJWTToken"
+      ]
+    },
+    {
+      "beanId": "userCSRFTokenAsyncFilter",
+      "scope": "singleton",
+      "params": [
+        "externalUserIP",
+        "externalUserAgent",
+        "externalUserCSRFToken"
+      ]
+    },
+    {
+      "beanId": "userCredentialsAsyncFilter",
+      "scope": "singleton",
+      "params": [
+        "externalUserUsername",
+        "externaleUserPassword"
+      ]
+    },
+    {
+      "beanId": "userRateLimitAsyncFilter",
+      "scope": "singleton",
+      "params": [
+        "externalUserIP",
+        "externalUserAgent",
+        "externalUserRateLimitTitle"
+      ]
+    },
+    {
+      "beanId": "userJWTTokenAsyncFilter",
+      "scope": "singleton",
+      "params": [
+        "externalUserJWTToken"
       ]
     }
   ]

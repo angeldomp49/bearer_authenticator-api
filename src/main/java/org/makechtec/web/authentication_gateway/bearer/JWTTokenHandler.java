@@ -2,8 +2,8 @@ package org.makechtec.web.authentication_gateway.bearer;
 
 import org.makechtec.software.json_tree.builders.ArrayStringLeafBuilder;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionInformation;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
@@ -16,12 +16,13 @@ public class JWTTokenHandler {
 
     private static final Logger LOG = Logger.getLogger(JWTTokenHandler.class.getName());
     private final SignaturePrinter signaturePrinter;
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public JWTTokenHandler(ConnectionInformation connectionInformation, SignaturePrinter signaturePrinter) {
+    public JWTTokenHandler(SignaturePrinter signaturePrinter, ConnectionPool connectionPool) {
         this.signaturePrinter = signaturePrinter;
-        this.connectionInformation = connectionInformation;
+        this.connectionPool = connectionPool;
     }
+
 
     public String createTokenForSession(SessionInformation session) {
 
@@ -65,7 +66,7 @@ public class JWTTokenHandler {
     public boolean isInBlackList(String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
             return
-                    new PostgresEngine<Boolean>(connectionInformation)
+                    new WithPoolEngine<Boolean>(connectionPool)
                             .queryString("""
                                     SELECT COUNT(*) AS qty
                                     FROM atepoztli__authentication_service__schema.token_blacklist
@@ -87,7 +88,7 @@ public class JWTTokenHandler {
 
     public void addToBlackList(String token) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
-            new PostgresEngine<Boolean>(connectionInformation)
+            new WithPoolEngine<Boolean>(connectionPool)
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.token_blacklist (token)
                             VALUES(?);

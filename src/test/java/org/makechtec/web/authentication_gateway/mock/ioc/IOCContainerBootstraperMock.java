@@ -4,14 +4,8 @@ import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
-import org.makechtec.web.authentication_gateway.ioc.BeansDefinition;
-import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.globalContext;
@@ -29,7 +23,6 @@ public class IOCContainerBootstraperMock implements ApplicationListener<Applicat
         iocContainer = new IOCContainer(globalContext);
 
 
-
         iocContainer.registerAll(BeansDefinitionMock.beans());
 
         iocContainer.instanciateSingletons();
@@ -45,7 +38,7 @@ public class IOCContainerBootstraperMock implements ApplicationListener<Applicat
                 ""
         );
 
-        var applicationSecretKey = "";
+        var applicationSecretKey = "test";
 
         var cryptographyConfiguration = new CrypographyInformation();
         cryptographyConfiguration.setSecretKey("");

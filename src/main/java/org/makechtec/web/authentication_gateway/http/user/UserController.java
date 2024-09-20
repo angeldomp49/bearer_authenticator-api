@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.http;
+package org.makechtec.web.authentication_gateway.http.user;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.web.authentication_gateway.api.user.StoredUserModel;

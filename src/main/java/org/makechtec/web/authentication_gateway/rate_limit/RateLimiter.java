@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.rate_limit;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
@@ -10,16 +10,16 @@ import java.util.logging.Logger;
 public class RateLimiter {
 
     private static final Logger LOG = Logger.getLogger(RateLimiter.class.getName());
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public RateLimiter(ConnectionInformation connectionInformation) {
-        this.connectionInformation = connectionInformation;
+    public RateLimiter(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     public void registerNewRateLimit(String title, int attempts, RateLimitTimeUnit timeUnit, int timeQuantity) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
 
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.rate_limits(title, attempts, unit, time_quantity)
@@ -42,7 +42,7 @@ public class RateLimiter {
         try {
 
             var totalOfAttemptsAvailable =
-                    new PostgresEngine<RateLimit>(connectionInformation)
+                    new WithPoolEngine<RateLimit>(connectionPool)
                             .isPrepared()
                             .queryString("""
                                     SELECT attempts, unit, time_quantity
@@ -72,7 +72,7 @@ public class RateLimiter {
                     """.replace("${filter}", beforeLimitFilter);
 
             var alreadyUsedAttempts =
-                    new PostgresEngine<Integer>(connectionInformation)
+                    new WithPoolEngine<Integer>(connectionPool)
                             .isPrepared()
                             .queryString(queryWithTimeFilter)
                             .addParamAtPosition(1, userIP, ParamType.TYPE_STRING)
@@ -135,7 +135,7 @@ public class RateLimiter {
     public void pushAttemptToThisClient(String userIP, String userAgent, String clientIP) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
 
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.client_attempts(user_ip, user_agent, client_ip, created_at)

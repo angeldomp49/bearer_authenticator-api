@@ -20,7 +20,7 @@ dependencies {
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.google.guava:guava:30.1.1-jre'
-    implementation 'org.makechtec.software:sql_support:2.1.0'
+    implementation 'org.makechtec.software:sql_support:3.0.0-beta'
     implementation 'org.json:json:20231013'
     implementation 'org.makechtec.software:json_tree:2.0.0'
     implementation("org.bouncycastle:bcpkix-jdk18on:1.77")

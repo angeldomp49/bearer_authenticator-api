@@ -28,7 +28,7 @@ public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
     public boolean canPassRequest(EnvironmentContext context) {
         try {
             var validationResult =
-                    !this.csrfTokenHandler.isValidCSRFToken(
+                    this.csrfTokenHandler.isValidCSRFToken(
                             (String) context.getItem("userIP"),
                             (String) context.getItem("userAgent"),
                             (String) context.getItem("clientAddress"),
@@ -54,7 +54,8 @@ public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
                             .build();
 
             return new ValidationFailedResponse(
-                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR)
+                    new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR),
+                    CSRFTokenAsyncFilter.class.getName()
             );
         }
 
@@ -63,7 +64,8 @@ public class CSRFTokenAsyncFilter implements RequestValidationAsyncFilter {
                         .put("message", "Unauthorized the CSRF token is invalid")
                         .build();
         return new ValidationFailedResponse(
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED)
+                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED),
+                CSRFTokenAsyncFilter.class.getName()
         );
 
     }

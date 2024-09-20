@@ -4,27 +4,34 @@ import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.ioc_container.ioc.InstanceScope;
-import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.PooledConnection;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
+import org.makechtec.web.authentication_gateway.bearer.JWTTokenHandler;
+import org.makechtec.web.authentication_gateway.bearer.session.SessionGenerator;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
+import org.makechtec.web.authentication_gateway.bearer.user.UserAuthenticator;
 import org.makechtec.web.authentication_gateway.configuration_load.JSONConfigurationLoader;
+import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.http.commons.actions.DeleteCSRFTokenAction;
-import org.makechtec.web.authentication_gateway.http.commons.actions.GenerateJWTTokenAction;
-import org.makechtec.web.authentication_gateway.http.commons.actions.PushUserAttemptAction;
-import org.makechtec.web.authentication_gateway.http.commons.filters.*;
+import org.makechtec.web.authentication_gateway.ioc.ActionsDefinition;
+import org.makechtec.web.authentication_gateway.ioc.FiltersDefinition;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
+import org.makechtec.web.authentication_gateway.rate_limit.RateLimitTimeUnit;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.mockito.Mockito;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class BeansDefinitionMock {
@@ -33,140 +40,40 @@ public class BeansDefinitionMock {
 
         var beans = new HashSet<BeanInformation>();
 
-        beans.add(new BeanInformation(
-                "userRateLimitFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new UserRateLimitAsyncFilter(
-                            (RateLimiter) container.getSingleton("rateLimiter"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("rateLimiter", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "userCredentialsFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new UserCredentialsAsyncFilter(
-                            (BearerAuthenticationFactory) container.getSingleton("bearerAuthenticationFactory"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("bearerAuthenticationFactory", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "clientCredentialsFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new ClientCredentialsAsyncFilter(
-                            (BearerAuthenticationFactory) container.getSingleton("bearerAuthenticationFactory"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("bearerAuthenticationFactory", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "clientAddressFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new ClientAddressAsyncFilter(
-                            (ClientValidator) container.getSingleton("clientValidator"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("clientValidator", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "csrfTokenFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new CSRFTokenAsyncFilter(
-                            (CSRFTokenHandler) container.getSingleton("csrfTokenHandler"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("csrfTokenHandler", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "clientAddressFilter",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new ClientAddressAsyncFilter(
-                            (ClientValidator) container.getSingleton("clientValidator"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("clientValidator", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "generateJWTTokenAction",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new GenerateJWTTokenAction(
-                            (BearerAuthenticationFactory) container.getSingleton("bearerAuthenticationFactory"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("bearerAuthenticationFactory", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "deleteCSRFTokenAction",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new DeleteCSRFTokenAction(
-                            (CSRFTokenHandler) container.getSingleton("csrfTokenHandler"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("csrfTokenHandler", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
-        beans.add(new BeanInformation(
-                "pushAttemptAction",
-                InstanceScope.SINGLETON,
-                args -> {
-                    var container = (IOCContainer) args[1];
-
-                    return new PushUserAttemptAction(
-                            (RateLimiter) container.getSingleton("rateLimiter"),
-                            (CommonResponseBuilder) container.getSingleton("commonResponseBuilder")
-                    );
-                },
-                Stream.of("rateLimiter", "commonResponseBuilder").collect(Collectors.toSet())
-        ));
-
+        beans.addAll(FiltersDefinition.beans());
+        beans.addAll(ActionsDefinition.beans());
 
         beans.add(new BeanInformation(
                 "csrfTokenHandler",
                 InstanceScope.SINGLETON,
                 args -> {
-                    var context = (EnvironmentContext) args[0];
+                    var container = (IOCContainer) args[1];
 
-                    var mock = Mockito.mock(CSRFTokenHandler.class);
+                    class MockCSRFTokenHandler extends CSRFTokenHandler {
+
+                        public MockCSRFTokenHandler(ConnectionPool connectionPool) {
+                            super(connectionPool);
+                        }
+
+                        @Override
+                        public void registerCSRFToken(String userIP, String userAgent, String clientIP, long expirationDate, String token) {
+
+                        }
+
+                        @Override
+                        public boolean isValidCSRFToken(String userIP, String userAgent, String clientIP, String token) {
+                            return true;
+                        }
+
+                        @Override
+                        public void deleteCSRFToken(String token) {
+
+                        }
+                    }
+
+                    var mock = new MockCSRFTokenHandler(
+                            null
+                    );
 
 
                     return mock;
@@ -180,11 +87,33 @@ public class BeansDefinitionMock {
                     var context = (EnvironmentContext) args[0];
                     var container = (IOCContainer) args[1];
 
-                    return new BearerAuthenticationFactory(
-                            (ConnectionInformation) context.getItem("globalDatabaseConnectionInformation"),
-                            (SignaturePrinter) container.getSingleton("signaturePrinter"),
-                            (PasswordHasher) container.getSingleton("passwordHasher")
-                    );
+                    var mock = Mockito.mock(BearerAuthenticationFactory.class);
+
+                    var userAuthenticatorMock = Mockito.mock(UserAuthenticator.class);
+
+                    var sessionGeneratorMock = Mockito.mock(SessionGenerator.class);
+
+                    try {
+
+                        when(userAuthenticatorMock.areValidCredentials(anyString(), anyString()))
+                                .thenReturn(true);
+
+
+                    } catch (SQLException | IllegalAccessException | InstantiationException |
+                             ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    when(mock.userAuthenticator())
+                            .thenReturn(userAuthenticatorMock);
+
+                    when(mock.sessionGenerator())
+                            .thenReturn(sessionGeneratorMock);
+
+                    when(mock.jwtTokenHandler())
+                            .thenReturn(Mockito.mock(JWTTokenHandler.class));
+
+                    return mock;
                 },
                 Stream.of("signaturePrinter", "passwordHasher").collect(Collectors.toSet())
         ));
@@ -193,9 +122,35 @@ public class BeansDefinitionMock {
                 "rateLimiter",
                 InstanceScope.SINGLETON,
                 args -> {
-                    var context = (EnvironmentContext) args[0];
+                    var container = (IOCContainer) args[1];
 
-                    var mock = Mockito.mock(RateLimiter.class);
+                    class MockRateLimiter extends RateLimiter {
+
+
+                        public MockRateLimiter(ConnectionPool connectionPool) {
+                            super(connectionPool);
+                        }
+
+                        @Override
+                        public void registerNewRateLimit(String a, int b, RateLimitTimeUnit c, int d) {
+
+                        }
+
+                        @Override
+                        public boolean hasAttemptsThisClient(String a, String b, String c, String d) {
+                            return true;
+                        }
+
+                        @Override
+                        public void pushAttemptToThisClient(String a, String b, String c) {
+
+                        }
+
+                    }
+
+                    var mock = new MockRateLimiter(
+                            null
+                    );
 
                     return mock;
                 }
@@ -235,6 +190,16 @@ public class BeansDefinitionMock {
         ));
 
         beans.add(new BeanInformation(
+                "csrfTokenGenerator",
+                InstanceScope.SINGLETON,
+                args -> {
+                    var context = (EnvironmentContext) args[0];
+
+                    return new CSRFTokenGenerator((String) context.getItem("applicationSecretKey"));
+                }
+        ));
+
+        beans.add(new BeanInformation(
                 "commonResponseBuilder",
                 InstanceScope.SINGLETON,
                 args -> new CommonResponseBuilder()
@@ -244,6 +209,39 @@ public class BeansDefinitionMock {
                 "jsonConfigurationLoader",
                 InstanceScope.SINGLETON,
                 args -> new JSONConfigurationLoader()
+        ));
+
+        beans.add(new BeanInformation(
+                "globalSQLPoolConnection",
+                InstanceScope.SINGLETON,
+                args -> {
+
+                    var pool = new ConnectionPool(Runtime.getRuntime().availableProcessors(), () -> new PooledConnection() {
+
+                        @Override
+                        public boolean isUsable() {
+                            return true;
+                        }
+
+                        @Override
+                        public Connection nativeConnection() {
+                            return Mockito.mock(Connection.class);
+                        }
+
+                        @Override
+                        public void close() throws SQLException {
+                        }
+                    });
+
+                    try {
+                        pool.boot();
+                    } catch (SQLException | IllegalAccessException | InstantiationException |
+                             ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    return pool;
+                }
         ));
 
         return beans;

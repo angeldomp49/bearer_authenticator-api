@@ -1,7 +1,7 @@
 {
   "actions": [
     {
-      "beanId": "pushAttemptAction",
+      "beanId": "pushUserAttemptAction",
       "scope": "singleton",
       "params": [
         "userIP",
@@ -20,6 +20,12 @@
       "scope": "singleton",
       "params": [
         "username"
+      ]
+    },
+    {
+      "beanId": "generateCSRFTokenAction",
+      "scope": "singleton",
+      "params": [
       ]
     }
   ]

@@ -1,7 +1,19 @@
 {
   "login": [
-    "csrfTokenFilter",
-    "userCredentialsFilter",
-    "userRateLimitFilter"
+    "clientCSRFTokenAsyncFilter",
+    "clientCredentialsAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
+  ],
+  "check": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
+  ],
+  "logout": [
+    "clientCSRFTokenAsyncFilter",
+    "clientJWTAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
   ]
 }

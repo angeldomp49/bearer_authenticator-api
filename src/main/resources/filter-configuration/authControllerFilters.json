@@ -1,7 +1,42 @@
 {
-  "login": [
-    "CSRFTokenFilter",
-    "CredentialsFilter",
-    "userRateLimitFilter"
+  "client/login": [
+    "clientCSRFTokenAsyncFilter",
+    "clientCredentialsAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
+  ],
+  "client/check": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
+  ],
+  "client/logout": [
+    "clientCSRFTokenAsyncFilter",
+    "clientJWTAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter"
+  ],
+  "external-user/login": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userCSRFTokenAsyncFilter",
+    "userCredentialsAsyncFilter",
+    "userRateLimitAsyncFilter"
+  ],
+  "external-user/check": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userJWTTokenAsyncFilter",
+    "userRateLimitAsyncFilter"
+  ],
+  "external-user/logout": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userCSRFTokenAsyncFilter",
+    "userJWTTokenAsyncFilter",
+    "userRateLimitAsyncFilter"
   ]
 }

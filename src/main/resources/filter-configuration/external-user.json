@@ -1,0 +1,25 @@
+{
+  "register": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userCSRFTokenAsyncFilter",
+    "userRateLimitAsyncFilter",
+    "userRegistrationAsyncFilter"
+  ],
+  "show": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userJWTTokenAsyncFilter",
+    "userRateLimitAsyncFilter"
+  ],
+  "delete": [
+    "clientJWTTokenAsyncFilter",
+    "clientRateLimitAsyncFilter",
+    "whiteListAsyncFilter",
+    "userJWTTokenAsyncFilter",
+    "userRateLimitAsyncFilter",
+    "userCSRFTokenAsyncFilter"
+  ]
+}

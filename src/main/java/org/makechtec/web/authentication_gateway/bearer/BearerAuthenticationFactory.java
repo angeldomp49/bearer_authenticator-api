@@ -1,6 +1,6 @@
 package org.makechtec.web.authentication_gateway.bearer;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionGenerator;
 import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
 import org.makechtec.web.authentication_gateway.bearer.user.UserAuthenticator;
@@ -11,26 +11,26 @@ import java.util.Calendar;
 
 public class BearerAuthenticationFactory {
 
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
     private final SignaturePrinter signaturePrinter;
     private final PasswordHasher passwordHasher;
 
-    public BearerAuthenticationFactory(ConnectionInformation connectionInformation, SignaturePrinter signaturePrinter, PasswordHasher passwordHasher) {
-        this.connectionInformation = connectionInformation;
+    public BearerAuthenticationFactory(ConnectionPool connectionPool, SignaturePrinter signaturePrinter, PasswordHasher passwordHasher) {
+        this.connectionPool = connectionPool;
         this.signaturePrinter = signaturePrinter;
         this.passwordHasher = passwordHasher;
     }
 
     public UserAuthenticator userAuthenticator() {
-        return new UserAuthenticator(new UserProvider(connectionInformation), passwordHasher);
+        return new UserAuthenticator(new UserProvider(connectionPool), passwordHasher);
     }
 
     public SessionGenerator sessionGenerator() {
-        return new SessionGenerator(30, Calendar.DAY_OF_MONTH, connectionInformation);
+        return new SessionGenerator(30, Calendar.DAY_OF_MONTH, connectionPool);
     }
 
     public JWTTokenHandler jwtTokenHandler() {
-        return new JWTTokenHandler(connectionInformation, signaturePrinter);
+        return new JWTTokenHandler(signaturePrinter, connectionPool);
     }
 
 }

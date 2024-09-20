@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.bearer.session;
 
-import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.software.sql_support.postgres.PostgresEngine;
+import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.WithPoolEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
 
 import java.sql.SQLException;
@@ -14,12 +14,12 @@ public class SessionGenerator {
     private static final Logger LOG = Logger.getLogger(SessionGenerator.class.getName());
     private final int sessionLifeTime;
     private final int sessionLifeUnits;
-    private final ConnectionInformation connectionInformation;
+    private final ConnectionPool connectionPool;
 
-    public SessionGenerator(int sessionLifeTime, int sessionLifeUnits, ConnectionInformation connectionInformation) {
+    public SessionGenerator(int sessionLifeTime, int sessionLifeUnits, ConnectionPool connectionPool) {
         this.sessionLifeTime = sessionLifeTime;
         this.sessionLifeUnits = sessionLifeUnits;
-        this.connectionInformation = connectionInformation;
+        this.connectionPool = connectionPool;
     }
 
 
@@ -28,7 +28,7 @@ public class SessionGenerator {
         try {
 
             var userId =
-                    new PostgresEngine<Long>(connectionInformation)
+                    new WithPoolEngine<Long>(connectionPool)
                             .queryString("""
                                     SELECT id FROM atepoztli__authentication_service__schema.users WHERE username = ?;
                                     """)
@@ -43,7 +43,7 @@ public class SessionGenerator {
             var permissions = new ArrayList<String>();
 
 
-            new PostgresEngine<Void>(connectionInformation)
+            new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
                             SELECT pinfo.*
