@@ -37,34 +37,35 @@ public class AuthController {
         this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> loginByUserRequest(
+    @PostMapping(
+            value = "client/login",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<String> loginForClient(
             @RequestHeader("User-Agent") String clientAgent,
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader("X-Csrf-Token") String xCsrfToken,
             @RequestBody String body
     ) {
 
         var jsonBody = new JSONObject(body);
 
         var clientAddress = request.getRemoteAddr();
-        String userAgent = jsonBody.getString("userAgent");
-        String userIP = jsonBody.getString("userAddress");
-        String xCsrfToken = jsonBody.getString("csrfToken");
-        String username = jsonBody.getString("username");
-        String password = jsonBody.getString("password");
+        String username = jsonBody.getString("clientUsername");
+        String password = jsonBody.getString("clientPassword");
 
         var context = new EnvironmentContext();
 
-        context.setItem("clientAddress", clientAddress);
-        context.setItem("userAddress", userIP);
-        context.setItem("userAgent", userAgent);
-        context.setItem("username", username);
-        context.setItem("password", password);
+        context.setItem("clientIP", clientAddress);
+        context.setItem("clientAgent", clientAgent);
+        context.setItem("clientCSRFToken", xCsrfToken);
+        context.setItem("clientUsername", username);
+        context.setItem("clientPassword", password);
         context.setItem("csrfToken", xCsrfToken);
-        context.setItem("rateLimitTitle", "login");
+        context.setItem("clientRateLimitTitle", "login");
 
         var possiblyErrorResponse =
-                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "login")
+                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/login")
                         .stream()
                         .filter(validationFilter -> validationFilter.canPassRequest(context))
                         .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
@@ -87,7 +88,7 @@ public class AuthController {
             return possiblyErrorInAction.get().responseEntity();
         }
 
-        var jwtToken = (String) context.getItem("jwtToken");
+        var jwtToken = (String) context.getItem("clientCredentialsAsyncFilter.jwtToken");
 
         var message =
                 ObjectLeaftBuilder.builder()
@@ -155,6 +156,68 @@ public class AuthController {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping(
+            value = "external-user/login",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<String> loginForExternalUser(
+            @RequestHeader("User-Agent") String clientAgent,
+            @RequestHeader("X-Csrf-Token") String xCsrfToken,
+            @RequestBody String body
+    ) {
+
+        var jsonBody = new JSONObject(body);
+
+        var clientAddress = request.getRemoteAddr();
+        String username = jsonBody.getString("clientUsername");
+        String password = jsonBody.getString("clientPassword");
+
+        var context = new EnvironmentContext();
+
+        context.setItem("clientIP", clientAddress);
+        context.setItem("clientAgent", clientAgent);
+        context.setItem("clientCSRFToken", xCsrfToken);
+        context.setItem("clientUsername", username);
+        context.setItem("clientPassword", password);
+        context.setItem("csrfToken", xCsrfToken);
+        context.setItem("clientRateLimitTitle", "login");
+
+        var possiblyErrorResponse =
+                requestValidationFilterConfigurer.provideFilters("authControllerFilters", "client/login")
+                        .stream()
+                        .filter(validationFilter -> validationFilter.canPassRequest(context))
+                        .map(requestValidationFilter -> requestValidationFilter.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorResponse.isPresent()) {
+            return possiblyErrorResponse.get().responseEntity();
+        }
+
+        var possiblyErrorInAction =
+                httpAsyncActionConfigurer.provideActions("adminControllerActions", "login")
+                        .stream()
+                        .parallel()
+                        .peek(action -> action.perform(context))
+                        .filter(action -> !action.hasSuccessfulFinished(context))
+                        .map(action -> action.createFailedResponse(context))
+                        .findFirst();
+
+        if (possiblyErrorInAction.isPresent()) {
+            return possiblyErrorInAction.get().responseEntity();
+        }
+
+        var jwtToken = (String) context.getItem("clientCredentialsAsyncFilter.jwtToken");
+
+        var message =
+                ObjectLeaftBuilder.builder()
+                        .put("token", jwtToken)
+                        .build();
+
+        return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
+
     }
 
 }
