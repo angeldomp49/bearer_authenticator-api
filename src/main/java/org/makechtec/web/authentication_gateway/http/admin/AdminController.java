@@ -45,14 +45,12 @@ public class AdminController {
 
         var context = new EnvironmentContext();
 
-        context.setItem("userIP", userIP);
-        context.setItem("userAddress", userIP);
-        context.setItem("clientAddress", userIP);
-        context.setItem("userAgent", userAgent);
-        context.setItem("csrfToken", xCsrfToken);
-        context.setItem("username", jsonBody.getString("username"));
-        context.setItem("password", jsonBody.getString("password"));
-        context.setItem("userRateLimitTitle", "login");
+        context.setItem("clientIP", userIP);
+        context.setItem("clientAgent", userAgent);
+        context.setItem("clientCSRFToken", xCsrfToken);
+        context.setItem("clientUsername", jsonBody.getString("username"));
+        context.setItem("clientPassword", jsonBody.getString("password"));
+        context.setItem("clientRateLimitTitle", "login");
 
         var possiblyErrorResponse =
                 requestValidationFilterConfigurer.provideFilters("adminControllerFilters", "login")
@@ -83,7 +81,7 @@ public class AdminController {
             return possiblyErrorInAction.get().responseEntity();
         }
 
-        var jwtToken = (String) context.getItem("jwtToken");
+        var jwtToken = (String) context.getItem("clientCredentialsAsyncFilter.jwtToke");
 
         var message =
                 ObjectLeaftBuilder.builder()
