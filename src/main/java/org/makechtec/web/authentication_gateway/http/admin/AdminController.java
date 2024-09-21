@@ -5,27 +5,33 @@ import org.json.JSONObject;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
+import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.ioc.ManuallyInjectable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
+
 @RestController
 @RequestMapping("/admin")
-public class AdminController {
+public class AdminController implements ManuallyInjectable {
 
-    private final RequestValidationFilterConfigurer requestValidationFilterConfigurer;
-    private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
-    private final CommonResponseBuilder commonResponseBuilder;
+    private RequestValidationFilterConfigurer requestValidationFilterConfigurer;
+    private HttpAsyncActionConfigurer httpAsyncActionConfigurer;
+    private CommonResponseBuilder commonResponseBuilder;
 
-    @Autowired
-    public AdminController(RequestValidationFilterConfigurer requestValidationFilterConfigurer, HttpAsyncActionConfigurer httpAsyncActionConfigurer, CommonResponseBuilder commonResponseBuilder) {
-        this.requestValidationFilterConfigurer = requestValidationFilterConfigurer;
-        this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
-        this.commonResponseBuilder = commonResponseBuilder;
+    @Override
+    public void inject(){
+
+        this.commonResponseBuilder = (CommonResponseBuilder) iocContainer.getSingleton("commonResponseBuilder");
+        this.requestValidationFilterConfigurer = (RequestValidationFilterConfigurer) iocContainer.getSingleton("requestValidationFilterConfigurer");
+        this.httpAsyncActionConfigurer = (HttpAsyncActionConfigurer) iocContainer.getSingleton("httpAsyncActionConfigurer");
+
     }
 
     @PostMapping(

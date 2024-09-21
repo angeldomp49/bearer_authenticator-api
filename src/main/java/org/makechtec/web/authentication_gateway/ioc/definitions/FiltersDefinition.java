@@ -1,20 +1,20 @@
-package org.makechtec.web.authentication_gateway.ioc;
+package org.makechtec.web.authentication_gateway.ioc.definitions;
 
 import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.ioc_container.ioc.InstanceScope;
+import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
+import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.http.commons.filters.client.*;
-import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserCSRFTokenAsyncFilter;
 import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserCredentialsAsyncFilter;
 import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserJWTTokenAsyncFilter;
 import org.makechtec.web.authentication_gateway.http.commons.filters.external_user.ExternalUserRateLimitAsyncFilter;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +23,24 @@ import java.util.stream.Stream;
 public class FiltersDefinition {
 
     public static Set<BeanInformation> beans() {
-        return Stream.of(forClient(), forExternalUser()).flatMap(Collection::stream).collect(Collectors.toSet());
+        var beans = new HashSet<BeanInformation>();
+
+        beans.addAll(forClient());
+        beans.addAll(forExternalUser());
+
+        beans.add(new BeanInformation(
+                "requestValidationFilterConfigurer",
+                InstanceScope.SINGLETON,
+                args -> new RequestValidationFilterConfigurer()
+        ));
+
+        beans.add(new BeanInformation(
+                "httpAsyncActionConfigurer",
+                InstanceScope.SINGLETON,
+                args -> new HttpAsyncActionConfigurer()
+        ));
+
+        return beans;
     }
 
     public static Set<BeanInformation> forClient(){

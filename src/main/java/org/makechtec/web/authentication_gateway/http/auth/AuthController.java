@@ -10,6 +10,7 @@ import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFacto
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.ioc.ManuallyInjectable;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,21 +21,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
+
 @RestController
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements ManuallyInjectable {
 
-    private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final HttpServletRequest request;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
-    private final RequestValidationFilterConfigurer requestValidationFilterConfigurer = new RequestValidationFilterConfigurer();
-    private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
+
+    private BearerAuthenticationFactory bearerAuthenticationFactory;
+    private CommonResponseBuilder commonResponseBuilder;
+    private RequestValidationFilterConfigurer requestValidationFilterConfigurer;
+    private HttpAsyncActionConfigurer httpAsyncActionConfigurer;
 
     @Autowired
-    public AuthController(@Qualifier("bearerAuthenticationFactory") BearerAuthenticationFactory bearerAuthenticationFactory, CSRFTokenHandler csrfTokenHandler, RateLimiter rateLimiter, HttpServletRequest request, HttpAsyncActionConfigurer httpAsyncActionConfigurer) {
-        this.bearerAuthenticationFactory = bearerAuthenticationFactory;
+    public AuthController(HttpServletRequest request) {
         this.request = request;
-        this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
+    }
+
+    @Override
+    public void inject(){
+        this.commonResponseBuilder = (CommonResponseBuilder) iocContainer.getSingleton("commonResponseBuilder");
+        this.bearerAuthenticationFactory = (BearerAuthenticationFactory) iocContainer.getSingleton("bearerAuthenticationFactory");
+        this.requestValidationFilterConfigurer = (RequestValidationFilterConfigurer) iocContainer.getSingleton("requestValidationFilterConfigurer");
+        this.httpAsyncActionConfigurer = (HttpAsyncActionConfigurer) iocContainer.getSingleton("httpAsyncActionConfigurer");
     }
 
     @PostMapping(

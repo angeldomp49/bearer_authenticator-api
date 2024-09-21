@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
+import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.ioc.ManuallyInjectable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,20 +16,24 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
+
 @RestController
 @RequestMapping("csrf")
-public class CSRFController {
+public class CSRFController implements ManuallyInjectable {
 
-    private final RequestValidationFilterConfigurer requestValidationFilterConfigurer;
-    private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
-    private final CommonResponseBuilder responseBuilder;
+    private RequestValidationFilterConfigurer requestValidationFilterConfigurer;
+    private HttpAsyncActionConfigurer httpAsyncActionConfigurer;
+    private CommonResponseBuilder responseBuilder;
 
-    public CSRFController(RequestValidationFilterConfigurer requestValidationFilterConfigurer, HttpAsyncActionConfigurer httpAsyncActionConfigurer, CommonResponseBuilder responseBuilder) {
-        this.requestValidationFilterConfigurer = requestValidationFilterConfigurer;
-        this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
-        this.responseBuilder = responseBuilder;
+    @Override
+    public void inject() {
+
+        this.responseBuilder = (CommonResponseBuilder) iocContainer.getSingleton("commonResponseBuilder");
+        this.requestValidationFilterConfigurer = (RequestValidationFilterConfigurer) iocContainer.getSingleton("requestValidationFilterConfigurer");
+        this.httpAsyncActionConfigurer = (HttpAsyncActionConfigurer) iocContainer.getSingleton("httpAsyncActionConfigurer");
+
     }
-
 
     @PostMapping(
             value = "/client",
@@ -79,6 +85,5 @@ public class CSRFController {
 
         return new ResponseEntity<>(responseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
     }
-
 
 }

@@ -1,4 +1,4 @@
-package org.makechtec.web.authentication_gateway.ioc;
+package org.makechtec.web.authentication_gateway.ioc.definitions;
 
 import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;

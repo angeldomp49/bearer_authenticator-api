@@ -10,29 +10,41 @@ import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFacto
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.ioc.ManuallyInjectable;
 import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 import org.makechtec.web.authentication_gateway.password.SaltGenerator;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper.iocContainer;
+
 @RestController
 @RequestMapping("user")
-public class ExternalUserController {
+public class ExternalUserController implements ManuallyInjectable {
 
     private final HttpServletRequest request;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
-    private final RequestValidationFilterConfigurer requestValidationFilterConfigurer = new RequestValidationFilterConfigurer();
-    private final HttpAsyncActionConfigurer httpAsyncActionConfigurer;
+    private CommonResponseBuilder commonResponseBuilder;
+    private RequestValidationFilterConfigurer requestValidationFilterConfigurer;
+    private HttpAsyncActionConfigurer httpAsyncActionConfigurer;
 
-    public ExternalUserController(HttpServletRequest request, HttpAsyncActionConfigurer httpAsyncActionConfigurer) {
+    @Autowired
+    public ExternalUserController(HttpServletRequest request) {
         this.request = request;
-        this.httpAsyncActionConfigurer = httpAsyncActionConfigurer;
     }
 
+    @Override
+    public void inject() {
+
+        this.commonResponseBuilder = (CommonResponseBuilder) iocContainer.getSingleton("commonResponseBuilder");
+        this.requestValidationFilterConfigurer = (RequestValidationFilterConfigurer) iocContainer.getSingleton("requestValidationFilterConfigurer");
+        this.httpAsyncActionConfigurer = (HttpAsyncActionConfigurer) iocContainer.getSingleton("httpAsyncActionConfigurer");
+
+    }
 
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
