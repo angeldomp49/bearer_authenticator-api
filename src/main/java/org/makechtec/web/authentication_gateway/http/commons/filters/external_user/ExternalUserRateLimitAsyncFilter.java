@@ -1,7 +1,6 @@
 package org.makechtec.web.authentication_gateway.http.commons.filters.external_user;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
-import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationAsyncFilter;
 import org.makechtec.web.authentication_gateway.filtering.ValidationFailedResponse;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
@@ -9,7 +8,6 @@ import org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilte
 import org.makechtec.web.authentication_gateway.http.commons.filters.client.ClientRateLimitAsyncFilter;
 import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
 
@@ -40,7 +38,7 @@ public class ExternalUserRateLimitAsyncFilter implements RequestValidationAsyncF
                             (String) context.getItem("externalUserRateLimitTitle")
                     );
 
-            if(!validationResult){
+            if (!validationResult) {
                 result = TOO_MANY_REQUESTS;
                 return false;
             }

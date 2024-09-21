@@ -7,13 +7,10 @@ import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.asyn_http.HttpAsyncActionConfigurer;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.ioc.ManuallyInjectable;
-import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +37,7 @@ public class AuthController implements ManuallyInjectable {
     }
 
     @Override
-    public void inject(){
+    public void inject() {
         this.commonResponseBuilder = (CommonResponseBuilder) iocContainer.getSingleton("commonResponseBuilder");
         this.bearerAuthenticationFactory = (BearerAuthenticationFactory) iocContainer.getSingleton("bearerAuthenticationFactory");
         this.requestValidationFilterConfigurer = (RequestValidationFilterConfigurer) iocContainer.getSingleton("requestValidationFilterConfigurer");

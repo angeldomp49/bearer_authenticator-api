@@ -1,7 +1,6 @@
 package org.makechtec.web.authentication_gateway.http.commons.filters.external_user;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
-import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationAsyncFilter;
 import org.makechtec.web.authentication_gateway.filtering.ValidationFailedResponse;
@@ -9,7 +8,6 @@ import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuild
 import org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult;
 import org.makechtec.web.authentication_gateway.http.commons.filters.client.ClientCSRFTokenAsyncFilter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
 

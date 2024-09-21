@@ -68,14 +68,14 @@ public class IOCContainerBootstraperMock implements ApplicationListener<Applicat
 
     }
 
-    private void injectManually(){
+    private void injectManually() {
 
         Stream.of(
                 applicationContext.getBean(AdminController.class),
                 applicationContext.getBean(AuthController.class),
                 applicationContext.getBean(CSRFController.class),
                 applicationContext.getBean(ExternalUserController.class)
-        ).forEach( ManuallyInjectable::inject);
+        ).forEach(ManuallyInjectable::inject);
 
     }
 

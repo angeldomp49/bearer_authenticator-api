@@ -1,14 +1,12 @@
 package org.makechtec.web.authentication_gateway.http.commons.filters.client;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
-import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.filtering.RequestValidationAsyncFilter;
 import org.makechtec.web.authentication_gateway.filtering.ValidationFailedResponse;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
 import org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
 
@@ -35,7 +33,7 @@ public class ClientCredentialsAsyncFilter implements RequestValidationAsyncFilte
                             (String) context.getItem("clientPassword")
                     );
 
-            if(!validationResult){
+            if (!validationResult) {
                 result = UNAUTHORIZED;
                 return false;
             }

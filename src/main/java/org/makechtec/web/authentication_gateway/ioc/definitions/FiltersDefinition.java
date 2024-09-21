@@ -43,7 +43,7 @@ public class FiltersDefinition {
         return beans;
     }
 
-    public static Set<BeanInformation> forClient(){
+    public static Set<BeanInformation> forClient() {
         var beans = new HashSet<BeanInformation>();
 
         beans.add(new BeanInformation(
@@ -119,7 +119,7 @@ public class FiltersDefinition {
         return beans;
     }
 
-    public static Set<BeanInformation> forExternalUser(){
+    public static Set<BeanInformation> forExternalUser() {
         var beans = new HashSet<BeanInformation>();
 
         beans.add(new BeanInformation(
@@ -166,7 +166,6 @@ public class FiltersDefinition {
 
         return beans;
     }
-
 
 
 }

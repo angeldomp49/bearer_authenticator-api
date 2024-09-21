@@ -35,7 +35,6 @@ public class ActionsDefinition {
         ));
 
 
-
         return beans;
     }
 

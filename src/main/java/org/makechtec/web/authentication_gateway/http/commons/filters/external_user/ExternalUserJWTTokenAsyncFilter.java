@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import java.sql.SQLException;
 
 import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.*;
-import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.DATABASE_CONNECTION_ERROR;
 
 public class ExternalUserJWTTokenAsyncFilter implements RequestValidationAsyncFilter {
 
