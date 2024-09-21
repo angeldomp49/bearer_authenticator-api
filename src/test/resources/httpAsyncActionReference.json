@@ -1,28 +1,6 @@
 {
   "actions": [
     {
-      "beanId": "pushUserAttemptAction",
-      "scope": "singleton",
-      "params": [
-        "userIP",
-        "userAgent"
-      ]
-    },
-    {
-      "beanId": "deleteCSRFTokenAction",
-      "scope": "singleton",
-      "params": [
-        "xCsrfToken"
-      ]
-    },
-    {
-      "beanId": "generateJWTTokenAction",
-      "scope": "singleton",
-      "params": [
-        "username"
-      ]
-    },
-    {
       "beanId": "generateCSRFTokenAction",
       "scope": "singleton",
       "params": [

@@ -1,8 +1,4 @@
 {
   "login": [
-    "generateJWTTokenAction",
-    "pushUserAttemptAction",
-    "deleteCSRFTokenAction",
-    "generateCSRFTokenAction"
   ]
 }

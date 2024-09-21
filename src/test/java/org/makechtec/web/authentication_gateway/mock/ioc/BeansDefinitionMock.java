@@ -160,9 +160,15 @@ public class BeansDefinitionMock {
                 "clientValidator",
                 InstanceScope.SINGLETON,
                 args -> {
-                    var context = (EnvironmentContext) args[0];
 
                     var mock = Mockito.mock(ClientValidator.class);
+
+                    try {
+                        when(mock.isAllowedClient(anyString())).thenReturn(true);
+                    } catch (SQLException | IllegalAccessException | InstantiationException |
+                             ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     return mock;
 

@@ -28,7 +28,7 @@ public class ClientRateLimitAsyncFilter implements RequestValidationAsyncFilter 
     public boolean canPassRequest(EnvironmentContext context) {
         try {
             var validationResult =
-                    !this.rateLimiter.hasAttemptsThisUser(
+                    this.rateLimiter.hasAttemptsThisUser(
                             (String) context.getItem("clientIP"),
                             (String) context.getItem("clientAgent"),
                             (String) context.getItem("clientRateLimitTitle")

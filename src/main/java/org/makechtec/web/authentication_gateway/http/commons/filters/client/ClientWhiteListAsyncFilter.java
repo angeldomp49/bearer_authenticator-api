@@ -10,8 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import java.sql.SQLException;
 
-import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.DATABASE_CONNECTION_ERROR;
-import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.SUCCESS;
+import static org.makechtec.web.authentication_gateway.http.commons.filters.CommonFilterResult.*;
 
 public class ClientWhiteListAsyncFilter implements RequestValidationAsyncFilter {
 
@@ -29,8 +28,13 @@ public class ClientWhiteListAsyncFilter implements RequestValidationAsyncFilter 
     public boolean canPassRequest(EnvironmentContext context) {
         try {
             var validationResult = this.clientValidator.isAllowedClient((String) context.getItem("clientIP"));
-            result = SUCCESS;
 
+            if (!validationResult) {
+                result = UNAUTHORIZED;
+                return false;
+            }
+
+            result = SUCCESS;
             return validationResult;
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             result = DATABASE_CONNECTION_ERROR;
@@ -45,7 +49,7 @@ public class ClientWhiteListAsyncFilter implements RequestValidationAsyncFilter 
         }
 
         return responseBuilder.createErrorResponse(
-                "Unauthorized the CSRF token is invalid",
+                "Unauthorized this client is not allowed",
                 HttpStatus.UNAUTHORIZED,
                 ClientWhiteListAsyncFilter.class
         );
