@@ -56,4 +56,39 @@ class AdminControllerTest {
         ;
 
     }
+
+    @Test
+    void check() throws Exception {
+
+        mvc.perform(
+                        post("/admin/check")
+                                .header("User-Agent", "test")
+                                .header("Authorization", "Bearer test")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.body.data").exists())
+                .andExpect(jsonPath("$.statusCode").exists())
+        ;
+
+    }
+
+    @Test
+    void logout() throws Exception {
+
+        mvc.perform(
+                        post("/admin/logout")
+                                .header("User-Agent", "test")
+                                .header("Authorization", "Bearer test")
+                                .header("X-Csrf-Token", "test")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNoContent())
+        ;
+
+    }
+
 }
