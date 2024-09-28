@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    "org.makechtec.web.authentication_gateway.plugins.rate_limit.RateLimitPlugin",
+    "org.makechtec.web.authentication_gateway.plugins.bearer.BearerAuthenticationPlugin",
+    "org.makechtec.web.authentication_gateway.plugins.csrf.CSRFPlugin",
+    "org.makechtec.web.authentication_gateway.plugins.admin.AdminRestForUIPlugin"
+  ]
+}

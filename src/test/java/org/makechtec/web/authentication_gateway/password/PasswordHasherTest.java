@@ -2,8 +2,10 @@ package org.makechtec.web.authentication_gateway.password;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
-import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
-import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
+import org.makechtec.web.authentication_gateway.plugins.admin.api.user.UserDBConnection;
+import org.makechtec.web.authentication_gateway.plugins.rate_limit.RateLimiter;
+import org.makechtec.web.authentication_gateway.plugins.bearer.password.PasswordHasher;
+import org.makechtec.web.authentication_gateway.plugins.bearer.password.SaltGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

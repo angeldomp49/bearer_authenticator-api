@@ -3,7 +3,6 @@ package org.makechtec.web.authentication_gateway.http.admin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
-import org.makechtec.web.authentication_gateway.ioc.IOCContainerBootstraper;
 import org.makechtec.web.authentication_gateway.mock.ioc.MockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
