@@ -5,8 +5,8 @@ import org.makechtec.software.ioc_container.ioc.BeanInformation;
 import org.makechtec.software.ioc_container.ioc.IOCContainer;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
-import org.makechtec.web.authentication_gateway.core.spring_integration.AuthApiApplication;
 import org.makechtec.web.authentication_gateway.core.beans.BeansDefinition;
+import org.makechtec.web.authentication_gateway.core.spring_integration.AuthApiApplication;
 import org.springframework.boot.SpringApplication;
 
 import java.sql.SQLException;
@@ -23,7 +23,7 @@ public class AuthenticationGatewayApplication {
     private final EnvironmentContext globalState = new EnvironmentContext();
     private final IOCContainer container = new IOCContainer(globalState);
 
-    public void boot(String[] args){
+    public void boot(String[] args) {
         registerPlugins();
         createGlobalVariables();
         onPreparedGlobalState();
@@ -33,11 +33,11 @@ public class AuthenticationGatewayApplication {
         onLoadedRestApplication();
     }
 
-    public void registerPlugins(){
+    public void registerPlugins() {
 
     }
 
-    public void createGlobalVariables(){
+    public void createGlobalVariables() {
         var globalDatabaseConnectionInformation = new ConnectionInformation(
                 "",
                 "",
@@ -49,11 +49,11 @@ public class AuthenticationGatewayApplication {
         globalState.setItem("globalDatabaseConnectionInformation", globalDatabaseConnectionInformation);
     }
 
-    public void onPreparedGlobalState(){
+    public void onPreparedGlobalState() {
         plugins.forEach(plugin -> plugin.onPreparedGlobalState(globalState));
     }
 
-    public void createBeans(){
+    public void createBeans() {
         beanDefinitions.addAll(BeansDefinition.beans());
         beanDefinitions.addAll(
                 plugins.stream()
@@ -67,7 +67,7 @@ public class AuthenticationGatewayApplication {
 
     }
 
-    public void onPreparedContainer(){
+    public void onPreparedContainer() {
 
         var connectionPool = (ConnectionPool) container.getSingleton("globalSQLPoolConnection");
 
@@ -81,12 +81,12 @@ public class AuthenticationGatewayApplication {
 
     }
 
-    public void loadRestApplication(String[] args){
+    public void loadRestApplication(String[] args) {
 
         SpringApplication.run(AuthApiApplication.class, args);
     }
 
-    public void onLoadedRestApplication(){
+    public void onLoadedRestApplication() {
         plugins.forEach(plugin -> plugin.onLoadedRestApplication(globalState, container));
     }
 

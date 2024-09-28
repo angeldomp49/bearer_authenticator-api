@@ -1,11 +1,11 @@
 package org.makechtec.web.authentication_gateway.plugins.csrf.filters;
 
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
-import org.makechtec.web.authentication_gateway.plugins.csrf.CSRFTokenHandler;
+import org.makechtec.web.authentication_gateway.commons.filtering.CommonFilterResult;
 import org.makechtec.web.authentication_gateway.commons.filtering.RequestValidationAsyncFilter;
 import org.makechtec.web.authentication_gateway.commons.filtering.ValidationFailedResponse;
 import org.makechtec.web.authentication_gateway.commons.http.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.commons.filtering.CommonFilterResult;
+import org.makechtec.web.authentication_gateway.plugins.csrf.CSRFTokenHandler;
 import org.springframework.http.HttpStatus;
 
 import java.sql.SQLException;

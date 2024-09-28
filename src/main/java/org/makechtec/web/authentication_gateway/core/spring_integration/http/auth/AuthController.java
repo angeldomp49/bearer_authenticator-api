@@ -6,10 +6,9 @@ import org.json.JSONObject;
 import org.makechtec.software.ioc_container.env.EnvironmentContext;
 import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.commons.asyn_http.HttpAsyncActionConfigurer;
-import org.makechtec.web.authentication_gateway.plugins.bearer.BearerAuthenticationFactory;
 import org.makechtec.web.authentication_gateway.commons.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.commons.http.CommonResponseBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.makechtec.web.authentication_gateway.plugins.bearer.BearerAuthenticationFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,7 @@ import java.sql.SQLException;
 
 
 @RequestMapping("/auth")
-public class AuthController   {
+public class AuthController {
 
     private final BearerAuthenticationFactory bearerAuthenticationFactory;
     private final CommonResponseBuilder commonResponseBuilder;

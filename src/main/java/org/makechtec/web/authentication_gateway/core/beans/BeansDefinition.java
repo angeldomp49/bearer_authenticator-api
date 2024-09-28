@@ -6,8 +6,8 @@ import org.makechtec.software.ioc_container.ioc.InstanceScope;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
 import org.makechtec.software.sql_support.connection_pool.postgres.PostgresPooledConnectionCreator;
-import org.makechtec.web.authentication_gateway.core.configuration_load.JSONConfigurationLoader;
 import org.makechtec.web.authentication_gateway.commons.http.CommonResponseBuilder;
+import org.makechtec.web.authentication_gateway.core.configuration_load.JSONConfigurationLoader;
 
 import java.util.HashSet;
 import java.util.Set;

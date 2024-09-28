@@ -7,15 +7,17 @@ import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
 import org.makechtec.web.authentication_gateway.commons.asyn_http.HttpAsyncActionConfigurer;
 import org.makechtec.web.authentication_gateway.commons.filtering.RequestValidationFilterConfigurer;
 import org.makechtec.web.authentication_gateway.commons.http.CommonResponseBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @RequestMapping("user")
-public class ExternalUserController  {
+public class ExternalUserController {
 
     private final CommonResponseBuilder commonResponseBuilder;
     private final RequestValidationFilterConfigurer requestValidationFilterConfigurer;
