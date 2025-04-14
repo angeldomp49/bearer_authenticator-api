@@ -6,12 +6,20 @@ plugins {
 }
 
 group = 'org.makechtec.web'
-version = '3.1.0'
+version = '4.0.0'
 sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
-    mavenLocal()
+
+    maven {
+        url =
+                uri("https://makech-technology-879381274336.d.codeartifact.us-east-2.amazonaws.com/maven/makech-technology-maven-repository/")
+        credentials {
+            username = "aws"
+            password = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -19,10 +27,12 @@ dependencies {
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.google.guava:guava:30.1.1-jre'
-    implementation 'org.makechtec.software:sql_support:2.1.1'
-    implementation 'org.json:json:20231013'
-    implementation 'org.makechtec.software:json_tree:2.0.0'
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
+    implementation("org.json:json:20231013")
+    implementation("org.makechtec.software:json_tree:3.0.0")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("de.mkammerer:argon2-jvm:2.11")
+    implementation("org.makechtec.software:sql_support:3.0.0-beta")
+    implementation("org.makechtec.bearer_authentication:tools:1.4.1")
 }
 
 tasks.named('test') {

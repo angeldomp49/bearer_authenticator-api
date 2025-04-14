@@ -1,6 +1,7 @@
 package org.makechtec.web.authentication_gateway.bearer.user;
 
-import org.makechtec.web.authentication_gateway.password.PasswordHasher;
+
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
 
 import java.sql.SQLException;
 

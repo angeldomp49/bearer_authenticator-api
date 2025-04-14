@@ -1,11 +1,11 @@
 package org.makechtec.web.authentication_gateway.bearer;
 
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SignaturePrinter;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.web.authentication_gateway.bearer.session.SessionGenerator;
-import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
 import org.makechtec.web.authentication_gateway.bearer.user.UserAuthenticator;
 import org.makechtec.web.authentication_gateway.bearer.user.UserProvider;
-import org.makechtec.web.authentication_gateway.password.PasswordHasher;
 
 import java.util.Calendar;
 

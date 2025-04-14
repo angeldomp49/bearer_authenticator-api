@@ -1,17 +1,15 @@
 package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.ArgonSettings;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SignaturePrinter;
 import org.makechtec.software.sql_support.ConnectionInformation;
-import org.makechtec.web.authentication_gateway.api.user.UserDBConnection;
 import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
-import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenGenerator;
-import org.makechtec.web.authentication_gateway.csrf.CSRFTokenHandler;
-import org.makechtec.web.authentication_gateway.csrf.ClientValidator;
 import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.password.PasswordHasher;
-import org.makechtec.web.authentication_gateway.rate_limit.RateLimiter;
+import org.makechtec.web.authentication_gateway.validation.rate_limit.RateLimitRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,12 +38,10 @@ public class ServiceProvider {
 
     @Bean
     public PasswordHasher passwordHasher() {
-        return new PasswordHasher(crypographyInformation());
-    }
-
-    @Bean
-    public UserDBConnection userDBConnection() {
-        return new UserDBConnection(connectionInformation());
+        return new PasswordHasherNative(new ArgonSettings(
+                crypographyInformation().getArgon2SettingsMemory(),
+                crypographyInformation().getArgon2SettingsIterations()
+        ));
     }
 
     @Bean
@@ -58,26 +54,10 @@ public class ServiceProvider {
         return new CrypographyInformation();
     }
 
-    @Bean
-    public ClientValidator clientValidator() {
-        return new ClientValidator(this.connectionInformation());
-    }
 
     @Bean
-    public CSRFTokenHandler csrfTokenHandler() {
-        return new CSRFTokenHandler(
-                this.connectionInformation()
-        );
-    }
-
-    @Bean
-    public CSRFTokenGenerator csrfTokenGenerator(){
-        return new CSRFTokenGenerator(this.crypographyInformation().getSecretKey());
-    }
-
-    @Bean
-    public RateLimiter rateLimiter() {
-        return new RateLimiter(this.connectionInformation());
+    public RateLimitRegistry rateLimiter() {
+        return new RateLimitRegistry(this.connectionInformation());
     }
 
     @Bean

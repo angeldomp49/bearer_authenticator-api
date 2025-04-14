@@ -1,13 +1,13 @@
 package org.makechtec.web.authentication_gateway.bearer;
 
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SessionInformation;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SignaturePrinter;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.TokenBuilder;
 import org.makechtec.software.json_tree.builders.ArrayStringLeafBuilder;
-import org.makechtec.software.json_tree.builders.ObjectLeaftBuilder;
+import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
-import org.makechtec.web.authentication_gateway.bearer.session.SessionInformation;
-import org.makechtec.web.authentication_gateway.bearer.token.SignaturePrinter;
-import org.makechtec.web.authentication_gateway.bearer.token.TokenBuilder;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -31,13 +31,13 @@ public class JWTTokenHandler {
 
         return TokenBuilder.builder(this.signaturePrinter)
                 .header(
-                        ObjectLeaftBuilder.builder()
+                        ObjectLeafBuilder.builder()
                                 .put("alg", "SHA256")
                                 .put("typ", "jwt")
                                 .build()
                 )
                 .payload(
-                        ObjectLeaftBuilder.builder()
+                        ObjectLeafBuilder.builder()
                                 .put("exp", session.expirationDate().getTimeInMillis())
                                 .put("uid", session.userId())
                                 .put("isClosed", session.isClosed())
@@ -70,7 +70,7 @@ public class JWTTokenHandler {
                                     SELECT COUNT(*) AS qty
                                     FROM atepoztli__authentication_service__schema.token_blacklist
                                     WHERE token = ?;
-                                     """)
+                                    """)
                             .isPrepared()
                             .addParamAtPosition(1, token, ParamType.TYPE_STRING)
                             .run(resultSet -> {
@@ -91,7 +91,7 @@ public class JWTTokenHandler {
                     .queryString("""
                             INSERT INTO atepoztli__authentication_service__schema.token_blacklist (token)
                             VALUES(?);
-                             """)
+                            """)
                     .isPrepared()
                     .addParamAtPosition(1, token, ParamType.TYPE_STRING)
                     .update();

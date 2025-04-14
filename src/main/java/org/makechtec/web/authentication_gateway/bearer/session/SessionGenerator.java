@@ -1,5 +1,6 @@
 package org.makechtec.web.authentication_gateway.bearer.session;
 
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SessionInformation;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.postgres.PostgresEngine;
 import org.makechtec.software.sql_support.query_process.statement.ParamType;
@@ -31,7 +32,7 @@ public class SessionGenerator {
                     new PostgresEngine<Long>(connectionInformation)
                             .queryString("""
                                     SELECT id FROM atepoztli__authentication_service__schema.users WHERE username = ?;
-                                     """)
+                                    """)
                             .isPrepared()
                             .addParamAtPosition(1, username, ParamType.TYPE_STRING)
                             .run(resultSet -> {
