@@ -2,6 +2,8 @@ package org.makechtec.web.authentication_gateway.resources.client.http;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
+import org.makechtec.web.authentication_gateway.commons.components.random_string.RandomStringGenerator;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 @RequestMapping("client/session")
 @RestController
@@ -19,16 +20,19 @@ public class ClientSessionController {
 
     public static final String RESOURCE_KIND = "client-kind";
     public static final String RATE_LIMIT_DEFINITION_NAME = "client-session-controller";
-    private static final Logger LOG = Logger.getLogger(ClientSessionController.class.getName());
     private final HttpServletRequest request;
     private final CommonJSONResponseBuilder commonJSONResponseBuilder;
     private final ControllerValidatorFactory validatorFactory;
+    private final CacheSystemTable cacheSystemTable;
+    private final RandomStringGenerator randomStringGenerator;
 
     @Autowired
-    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory) {
+    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable, RandomStringGenerator randomStringGenerator) {
         this.request = request;
         this.commonJSONResponseBuilder = commonJSONResponseBuilder;
         this.validatorFactory = validatorFactory;
+        this.cacheSystemTable = cacheSystemTable;
+        this.randomStringGenerator = randomStringGenerator;
     }
 
 
@@ -66,7 +70,7 @@ public class ClientSessionController {
 
             validatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!validatorFactory.getCSRFValidator().isValidCSRF(clientXCsrfToken)) {
+            if (!validatorFactory.getCSRFValidator().isValidCSRF(clientXCsrfToken, cacheSystemTable.request("temporaryApplicationSecretKey"))) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
@@ -131,15 +135,6 @@ public class ClientSessionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-    }
-
-    @DeleteMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Client-Authorization") String authorization) {
-
-        var token = authorization.replace("Bearer ", "").trim();
-
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

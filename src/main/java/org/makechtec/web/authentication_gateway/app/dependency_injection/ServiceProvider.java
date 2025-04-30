@@ -2,6 +2,7 @@ package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.ArgonSettings;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.csrf.CSRFTokenGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.token.JWTTokenGenerator;
 import org.makechtec.software.sql_support.ConnectionInformation;
@@ -18,6 +19,8 @@ import org.makechtec.web.authentication_gateway.commons.components.rate_limit.Ra
 import org.makechtec.web.authentication_gateway.commons.components.session.CommonSessionValidator;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.*;
+import org.makechtec.web.authentication_gateway.resources.application.api.ApplicationDBConnection;
+import org.makechtec.web.authentication_gateway.resources.client.api.ClientDBConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -59,12 +62,12 @@ public class ServiceProvider {
             }
         };
     }
-    
+
     @Bean
     public CacheSystemTable cacheSystemTable() {
         return new CacheSystemTable();
     }
-    
+
     @Bean
     public RandomStringGenerator randomStringGenerator() {
         return new RandomStringGenerator();
@@ -118,5 +121,20 @@ public class ServiceProvider {
     @Bean
     public CommonJSONResponseBuilder commonResponseBuilder() {
         return new CommonJSONResponseBuilder();
+    }
+
+    @Bean
+    public ApplicationDBConnection applicationDBConnection() {
+        return new ApplicationDBConnection(connectionPool());
+    }
+
+    @Bean
+    public ClientDBConnection clientDBConnection() {
+        return new ClientDBConnection(connectionPool());
+    }
+
+    @Bean
+    public SaltGenerator saltGenerator() {
+        return new SaltGenerator();
     }
 }

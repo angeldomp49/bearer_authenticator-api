@@ -2,6 +2,7 @@ package org.makechtec.web.authentication_gateway.resources.application.http;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
@@ -11,23 +12,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 @RequestMapping("application/session")
+@RestController
 public class ApplicationSessionController {
 
     public static final String RATE_LIMIT_DEFINITION_NAME = "application-session-controller";
     public static final String RESOURCE_KIND = "application";
-    private static final Logger LOG = Logger.getLogger(ApplicationSessionController.class.getName());
     private final ControllerValidatorFactory controllerValidatorFactory;
     private final HttpServletRequest request;
     private final CommonJSONResponseBuilder commonJSONResponseBuilder;
+    private final CacheSystemTable cacheSystemTable;
 
     @Autowired
-    public ApplicationSessionController(ControllerValidatorFactory controllerValidatorFactory, HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder) {
+    public ApplicationSessionController(ControllerValidatorFactory controllerValidatorFactory, HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, CacheSystemTable cacheSystemTable) {
         this.controllerValidatorFactory = controllerValidatorFactory;
         this.request = request;
         this.commonJSONResponseBuilder = commonJSONResponseBuilder;
+        this.cacheSystemTable = cacheSystemTable;
     }
 
 
@@ -55,7 +57,8 @@ public class ApplicationSessionController {
 
             controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!controllerValidatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken)) {
+            var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
+            if (!controllerValidatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken, secretKey)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

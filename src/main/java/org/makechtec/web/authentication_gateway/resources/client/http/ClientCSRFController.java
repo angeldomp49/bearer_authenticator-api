@@ -2,6 +2,7 @@ package org.makechtec.web.authentication_gateway.resources.client.http;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
@@ -28,12 +29,14 @@ public class ClientCSRFController {
     private final HttpServletRequest request;
     private final CommonJSONResponseBuilder responseBuilder;
     private final ControllerValidatorFactory validatorFactory;
+    private final CacheSystemTable cacheSystemTable;
 
     @Autowired
-    public ClientCSRFController(HttpServletRequest request, CommonJSONResponseBuilder responseBuilder, ControllerValidatorFactory validatorFactory) {
+    public ClientCSRFController(HttpServletRequest request, CommonJSONResponseBuilder responseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable) {
         this.request = request;
         this.responseBuilder = responseBuilder;
         this.validatorFactory = validatorFactory;
+        this.cacheSystemTable = cacheSystemTable;
     }
 
 
@@ -70,7 +73,12 @@ public class ClientCSRFController {
                 }
             });
 
-            CompletableFuture<String> tokenFuture = CompletableFuture.supplyAsync(validatorFactory.getCSRFValidator()::generateCSRFToken);
+            CompletableFuture<String> tokenFuture = CompletableFuture.supplyAsync(() ->
+                    validatorFactory.getCSRFValidator()
+                            .generateCSRFToken(
+                                    cacheSystemTable.request("temporaryApplicationSecretKey")
+                            )
+            );
 
 
             var isAllowed = validatorFactory.getIPBlackListValidator().isValidIP(applicationIP, APPLICATION_IP_TAG)

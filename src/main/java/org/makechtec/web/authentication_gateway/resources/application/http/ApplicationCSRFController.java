@@ -3,7 +3,6 @@ package org.makechtec.web.authentication_gateway.resources.application.http;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
-import org.makechtec.web.authentication_gateway.commons.components.random_string.RandomStringGenerator;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
@@ -13,12 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @RequestMapping("application/csrf")
+@RestController
 public class ApplicationCSRFController {
 
     public static final String RATE_LIMIT_DEFINITION_NAME = "application-csrf-controller";
@@ -27,15 +28,13 @@ public class ApplicationCSRFController {
     private final CommonJSONResponseBuilder commonJSONResponseBuilder;
     private final HttpServletRequest request;
     private final CacheSystemTable cacheSystemTable;
-    private final RandomStringGenerator randomStringGenerator;
 
     @Autowired
-    public ApplicationCSRFController(ControllerValidatorFactory controllerValidatorFactory, CommonJSONResponseBuilder commonJSONResponseBuilder, HttpServletRequest request, CacheSystemTable cacheSystemTable, RandomStringGenerator randomStringGenerator) {
+    public ApplicationCSRFController(ControllerValidatorFactory controllerValidatorFactory, CommonJSONResponseBuilder commonJSONResponseBuilder, HttpServletRequest request, CacheSystemTable cacheSystemTable) {
         this.controllerValidatorFactory = controllerValidatorFactory;
         this.commonJSONResponseBuilder = commonJSONResponseBuilder;
         this.request = request;
         this.cacheSystemTable = cacheSystemTable;
-        this.randomStringGenerator = randomStringGenerator;
     }
 
 
@@ -61,13 +60,12 @@ public class ApplicationCSRFController {
                 }
             });
 
-            CompletableFuture<String> tokenFuture = CompletableFuture.supplyAsync(() -> {
-                if(!cacheSystemTable.contains("temporaryApplicationSecretKey")) {
-                    cacheSystemTable.put("temporaryApplicationSecretKey", randomStringGenerator.generateTemporarySecretKey());
-                }
-
-                return controllerValidatorFactory.getCSRFValidator().generateCSRFToken(cacheSystemTable.request("temporaryApplicationSecretKey"));
-            });
+            CompletableFuture<String> tokenFuture = CompletableFuture.supplyAsync(() ->
+                    controllerValidatorFactory.getCSRFValidator()
+                            .generateCSRFToken(
+                                    cacheSystemTable.request("temporaryApplicationSecretKey")
+                            )
+            );
 
 
             var isAllowed = controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP);

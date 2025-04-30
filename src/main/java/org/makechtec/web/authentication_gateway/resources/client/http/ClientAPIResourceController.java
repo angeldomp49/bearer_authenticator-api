@@ -3,6 +3,7 @@ package org.makechtec.web.authentication_gateway.resources.client.http;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
 import org.makechtec.web.authentication_gateway.resources.client.api.ClientDBConnection;
 import org.makechtec.web.authentication_gateway.resources.client.api.ClientModel;
@@ -24,14 +25,16 @@ public class ClientAPIResourceController {
     private final HttpServletRequest request;
     private final ClientDBConnection clientDBConnection;
     private final ControllerValidatorFactory validatorFactory;
+    private final CacheSystemTable cacheSystemTable;
 
     @Autowired
-    public ClientAPIResourceController(PasswordHasher passwordHasher, SaltGenerator saltGenerator, HttpServletRequest request, ClientDBConnection clientDBConnection, ControllerValidatorFactory validatorFactory) {
+    public ClientAPIResourceController(PasswordHasher passwordHasher, SaltGenerator saltGenerator, HttpServletRequest request, ClientDBConnection clientDBConnection, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable) {
         this.passwordHasher = passwordHasher;
         this.saltGenerator = saltGenerator;
         this.request = request;
         this.clientDBConnection = clientDBConnection;
         this.validatorFactory = validatorFactory;
+        this.cacheSystemTable = cacheSystemTable;
     }
 
 
@@ -69,7 +72,9 @@ public class ClientAPIResourceController {
 
             validatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!validatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken)) {
+            var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
+
+            if (!validatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken, secretKey)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

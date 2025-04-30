@@ -29,9 +29,9 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        
-        cacheSystemTable.put("temporaryApplicationSecretKey", randomStringGenerator.generateTemporarySecretKey());
-        
+
+        cacheSystemTable.putCallback("temporaryApplicationSecretKey", randomStringGenerator::generateTemporarySecretKey);
+
         try {
             this.rateLimitRegistry.registerNewRateLimit("login", 5, RateLimitTimeUnit.MINUTE, 15);
             this.rateLimitRegistry.registerNewRateLimit("register", 5, RateLimitTimeUnit.MINUTE, 15);
