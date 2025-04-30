@@ -70,7 +70,7 @@ public class ClientSessionController {
 
             validatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!validatorFactory.getCSRFValidator().isValidCSRF(clientXCsrfToken, cacheSystemTable.request("temporaryApplicationSecretKey"))) {
+            if (validatorFactory.getCSRFValidator().nonValidCSRF(clientXCsrfToken, cacheSystemTable.request("temporaryApplicationSecretKey"))) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

@@ -13,6 +13,11 @@ public class CommonHeaderCSRFValidator implements CSRFValidator {
     }
 
     @Override
+    public boolean nonValidCSRF(String csrf, String secretKey) {
+        return !isValidCSRF(csrf, secretKey);
+    }
+
+    @Override
     public boolean isValidCSRF(String csrf, String secretKey) throws ControllerValidationException {
         return csrfTokenGenerator.isValidCSRFToken(csrf, secretKey);
     }

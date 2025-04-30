@@ -58,7 +58,7 @@ public class ApplicationSessionController {
             controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
             var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
-            if (!controllerValidatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken, secretKey)) {
+            if (controllerValidatorFactory.getCSRFValidator().nonValidCSRF(applicationXCsrfToken, secretKey)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

@@ -74,7 +74,7 @@ public class ClientAPIResourceController {
 
             var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
 
-            if (!validatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken, secretKey)) {
+            if (validatorFactory.getCSRFValidator().nonValidCSRF(applicationXCsrfToken, secretKey)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
