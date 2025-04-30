@@ -1,3 +1,3 @@
 create
-database base_database;
+    database base_database;
 

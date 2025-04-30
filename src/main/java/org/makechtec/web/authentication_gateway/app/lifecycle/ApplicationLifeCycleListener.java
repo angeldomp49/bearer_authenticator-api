@@ -7,6 +7,7 @@ import org.makechtec.web.authentication_gateway.commons.components.rate_limit.Ra
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -28,7 +29,7 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
     }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void onApplicationEvent(@NonNull ApplicationReadyEvent event) {
 
         cacheSystemTable.putCallback("temporaryApplicationSecretKey", randomStringGenerator::generateTemporarySecretKey);
 

@@ -3,7 +3,6 @@ package org.makechtec.web.authentication_gateway.resources.client.http;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
-import org.makechtec.web.authentication_gateway.commons.components.random_string.RandomStringGenerator;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
@@ -26,7 +25,7 @@ public class ClientSessionController {
     private final CacheSystemTable cacheSystemTable;
 
     @Autowired
-    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable ) {
+    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable) {
         this.request = request;
         this.commonJSONResponseBuilder = commonJSONResponseBuilder;
         this.validatorFactory = validatorFactory;
