@@ -1,7 +1,10 @@
 package org.makechtec.web.authentication_gateway.app.lifecycle;
 
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
+import org.makechtec.web.authentication_gateway.commons.components.random_string.RandomStringGenerator;
 import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitRegistry;
 import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitTimeUnit;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -14,13 +17,21 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
 
     private static final Logger LOG = Logger.getLogger(ApplicationLifeCycleListener.class.getName());
     private final RateLimitRegistry rateLimitRegistry;
+    private final CacheSystemTable cacheSystemTable;
+    private final RandomStringGenerator randomStringGenerator;
 
-    public ApplicationLifeCycleListener(RateLimitRegistry rateLimitRegistry) {
+    @Autowired
+    public ApplicationLifeCycleListener(RateLimitRegistry rateLimitRegistry, CacheSystemTable cacheSystemTable, RandomStringGenerator randomStringGenerator) {
         this.rateLimitRegistry = rateLimitRegistry;
+        this.cacheSystemTable = cacheSystemTable;
+        this.randomStringGenerator = randomStringGenerator;
     }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        
+        cacheSystemTable.put("temporaryApplicationSecretKey", randomStringGenerator.generateTemporarySecretKey());
+        
         try {
             this.rateLimitRegistry.registerNewRateLimit("login", 5, RateLimitTimeUnit.MINUTE, 15);
             this.rateLimitRegistry.registerNewRateLimit("register", 5, RateLimitTimeUnit.MINUTE, 15);

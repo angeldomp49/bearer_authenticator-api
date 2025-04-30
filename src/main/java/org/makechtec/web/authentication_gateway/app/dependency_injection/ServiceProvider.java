@@ -10,7 +10,9 @@ import org.makechtec.software.sql_support.connection_pool.postgres.PostgresPoole
 import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
 import org.makechtec.web.authentication_gateway.commons.components.address.AddressBlackListValidator;
+import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
 import org.makechtec.web.authentication_gateway.commons.components.csrf.CommonHeaderCSRFValidator;
+import org.makechtec.web.authentication_gateway.commons.components.random_string.RandomStringGenerator;
 import org.makechtec.web.authentication_gateway.commons.components.rate_limit.CommonRateLimitValidator;
 import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitRegistry;
 import org.makechtec.web.authentication_gateway.commons.components.session.CommonSessionValidator;
@@ -56,6 +58,16 @@ public class ServiceProvider {
                 );
             }
         };
+    }
+    
+    @Bean
+    public CacheSystemTable cacheSystemTable() {
+        return new CacheSystemTable();
+    }
+    
+    @Bean
+    public RandomStringGenerator randomStringGenerator() {
+        return new RandomStringGenerator();
     }
 
     @Bean
