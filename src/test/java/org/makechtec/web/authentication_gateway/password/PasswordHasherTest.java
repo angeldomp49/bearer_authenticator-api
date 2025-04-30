@@ -2,6 +2,8 @@ package org.makechtec.web.authentication_gateway.password;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -10,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 class PasswordHasherTest {
 
-    private final PasswordHasher passwordHasher;
+    private final PasswordHasherNative passwordHasher;
     private final SaltGenerator saltGenerator = new SaltGenerator();
 
     @Autowired
-    PasswordHasherTest(PasswordHasher passwordHasher) {
+    PasswordHasherTest(PasswordHasherNative passwordHasher) {
         this.passwordHasher = passwordHasher;
     }
 
