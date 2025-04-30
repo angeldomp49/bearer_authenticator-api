@@ -1,0 +1,2 @@
+create schema atepoztli__authentication_service__schema;
+

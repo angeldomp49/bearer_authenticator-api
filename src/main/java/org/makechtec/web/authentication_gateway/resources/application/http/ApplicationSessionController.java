@@ -1,60 +1,65 @@
 package org.makechtec.web.authentication_gateway.resources.application.http;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.csrf.CSRFTokenGenerator;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
-import org.makechtec.web.authentication_gateway.http.commons.CommonResponseBuilder;
-import org.makechtec.web.authentication_gateway.resources.application.session.ApplicationAuthenticator;
-import org.makechtec.web.authentication_gateway.resources.application.validation.ApplicationRateLimitValidator;
+import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
+import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
+import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 @RequestMapping("application/session")
 public class ApplicationSessionController {
 
+    public static final String RATE_LIMIT_DEFINITION_NAME = "application-session-controller";
+    public static final String RESOURCE_KIND = "application";
     private static final Logger LOG = Logger.getLogger(ApplicationSessionController.class.getName());
-
-    private final ApplicationRateLimitValidator applicationRateLimitValidator;
-    private final ApplicationAuthenticator authenticator;
-    private final CSRFTokenGenerator csrfTokenGenerator;
+    private final ControllerValidatorFactory controllerValidatorFactory;
     private final HttpServletRequest request;
-    private final CommonResponseBuilder commonResponseBuilder = new CommonResponseBuilder();
+    private final CommonJSONResponseBuilder commonJSONResponseBuilder;
 
-    public ApplicationSessionController(ApplicationRateLimitValidator applicationRateLimitValidator, ApplicationAuthenticator authenticator, CSRFTokenGenerator csrfTokenGenerator, HttpServletRequest request) {
-        this.applicationRateLimitValidator = applicationRateLimitValidator;
-        this.authenticator = authenticator;
-        this.csrfTokenGenerator = csrfTokenGenerator;
+    @Autowired
+    public ApplicationSessionController(ControllerValidatorFactory controllerValidatorFactory, HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder) {
+        this.controllerValidatorFactory = controllerValidatorFactory;
         this.request = request;
+        this.commonJSONResponseBuilder = commonJSONResponseBuilder;
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<String> loginByUserRequest(
-            @RequestHeader("User-Agent") String userAgent,
-            @RequestHeader("X-Csrf-Token") String xCsrfToken,
+            @RequestHeader("Application-Agent") String applicationAgent,
+            @RequestHeader("Application-X-Csrf-Token") String applicationXCsrfToken,
 
             @RequestParam("accessKey") String accessKey,
             @RequestParam("secret") String secret
     ) {
 
-        var userIP = request.getRemoteAddr();
+        var applicationIP = request.getRemoteAddr();
 
         try {
 
-            if (!this.applicationRateLimitValidator.hasAttemptsThisClient(userIP, userAgent, "login")) {
+            var rateLimitInformation = new HashMap<String, String>();
+
+            rateLimitInformation.put("applicationIP", applicationIP);
+            rateLimitInformation.put("applicationAgent", applicationAgent);
+
+            if (!controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
-            this.applicationRateLimitValidator.pushAttemptToThisClient(userIP, userAgent);
+            controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!this.csrfTokenGenerator.isValidCSRFToken(xCsrfToken)) {
+            if (!controllerValidatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
-            var areValidCredentials = authenticator.areValidCredentials(accessKey, secret);
+            var areValidCredentials = controllerValidatorFactory.getSessionAuthenticator().areValidCredentials(accessKey, secret, RESOURCE_KIND);
 
             if (!areValidCredentials) {
                 var message =
@@ -62,41 +67,42 @@ public class ApplicationSessionController {
                                 .put("message", "Username or password are invalid")
                                 .build();
 
-                return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
             }
 
-            var session = authenticator.createSession(accessKey);
-            var token = authenticator.createJWT(session);
+            var session = controllerValidatorFactory.getSessionAuthenticator().createSession(accessKey);
+            var token = controllerValidatorFactory.getSessionAuthenticator().createJWT(session);
 
             var message =
                     ObjectLeafBuilder.builder()
                             .put("token", token)
                             .build();
 
-            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
+            return new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.CREATED), HttpStatus.CREATED);
 
-        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+        } catch (ControllerValidationException e) {
             var message =
                     ObjectLeafBuilder.builder()
                             .put("message", "There was an error in the application")
                             .build();
 
-            return new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
 
     @GetMapping("/check")
     public ResponseEntity<String> checkToken(
-            @RequestHeader("Authorization") String authorization
+            @RequestHeader("Application-Authorization") String applicationAuthorization
     ) {
-        var token = authorization.replace("Bearer ", "").trim();
+        var token = applicationAuthorization.replace("Bearer ", "").trim();
 
 
         boolean isValidToken = false;
+
         try {
-            isValidToken = authenticator.isValidJWTSignature(token);
-        } catch (SQLException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            isValidToken = controllerValidatorFactory.getSessionAuthenticator().isValidJWTSignature(token);
+        } catch (ControllerValidationException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -105,12 +111,12 @@ public class ApplicationSessionController {
                         .put("isValid", isValidToken)
                         .build();
 
-        return isValidToken ? new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK) :
-                new ResponseEntity<>(commonResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+        return isValidToken ? new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK) :
+                new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<Void> logout(@RequestHeader("Application-Authorization") String applicationAuthorization) {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

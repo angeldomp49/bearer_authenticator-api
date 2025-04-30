@@ -3,71 +3,74 @@ package org.makechtec.web.authentication_gateway.resources.application.http;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.csrf.CSRFTokenGenerator;
+import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
 import org.makechtec.web.authentication_gateway.resources.application.api.ApplicationDBConnection;
 import org.makechtec.web.authentication_gateway.resources.application.api.ApplicationModel;
-import org.makechtec.web.authentication_gateway.resources.application.session.ApplicationAuthenticator;
-import org.makechtec.web.authentication_gateway.resources.application.validation.ApplicationRateLimitValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("application/api")
 public class ApplicationAPIResourceController {
 
+    public static final String RATE_LIMIT_DEFINITION_NAME = "application-api-controller";
     private final PasswordHasher passwordHasher;
     private final SaltGenerator saltGenerator = new SaltGenerator();
     private final HttpServletRequest request;
-    private final ApplicationRateLimitValidator rateLimitValidator;
-    private final CSRFTokenGenerator csrfTokenGenerator;
-    private final ApplicationAuthenticator authenticator;
+    private final ControllerValidatorFactory validatorFactory;
     private final ApplicationDBConnection applicationDBConnection;
 
-
-    public ApplicationAPIResourceController(PasswordHasher passwordHasher, HttpServletRequest request, ApplicationRateLimitValidator rateLimitValidator, CSRFTokenGenerator csrfTokenGenerator, ApplicationAuthenticator authenticator, ApplicationDBConnection applicationDBConnection) {
+    @Autowired
+    public ApplicationAPIResourceController(PasswordHasher passwordHasher, HttpServletRequest request, ControllerValidatorFactory validatorFactory, ApplicationDBConnection applicationDBConnection) {
         this.passwordHasher = passwordHasher;
         this.request = request;
-        this.rateLimitValidator = rateLimitValidator;
-        this.csrfTokenGenerator = csrfTokenGenerator;
-        this.authenticator = authenticator;
+        this.validatorFactory = validatorFactory;
         this.applicationDBConnection = applicationDBConnection;
     }
 
+
     @PostMapping
     public ResponseEntity<String> store(
-            @RequestHeader("User-Agent") String userAgent,
-            @RequestHeader("X-Csrf-Token") String xCsrfToken,
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader("Application-Agent") String applicationAgent,
+            @RequestHeader("Application-X-Csrf-Token") String applicationXCsrfToken,
+            @RequestHeader("Application-Authorization") String applicationAuthorization,
 
             @RequestParam("accessKey") String accessKey,
-            @RequestParam("secret") String password
+            @RequestParam("secret") String secret
     ) {
         var applicationIP = request.getRemoteAddr();
 
-        var token = authorization.replace("Bearer ", "").trim();
+        var token = applicationAuthorization.replace("Bearer ", "").trim();
 
         try {
 
-            if (!this.rateLimitValidator.hasAttemptsThisClient(applicationIP, userAgent, "application")) {
+            var rateLimitInformation = new HashMap<String, String>();
+
+            rateLimitInformation.put("applicationIP", applicationIP);
+            rateLimitInformation.put("applicationAgent", applicationAgent);
+
+            if (!validatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)) {
                 return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
             }
 
-            rateLimitValidator.pushAttemptToThisClient(applicationIP, userAgent);
+            validatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
 
-            if (!csrfTokenGenerator.isValidCSRFToken(xCsrfToken)) {
+            if (!validatorFactory.getCSRFValidator().isValidCSRF(applicationXCsrfToken)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
-            if (!authenticator.isValidJWTSignature(token)) {
+            if (!validatorFactory.getSessionAuthenticator().isValidJWTSignature(token)) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
             var salt = saltGenerator.generate();
 
-            var rawHashed = passwordHasher.rawHashNotIncludingSalt(password, salt);
+            var rawHashed = passwordHasher.rawHashNotIncludingSalt(secret, salt);
 
             applicationDBConnection.store(new ApplicationModel(
                     accessKey,

@@ -1,7 +1,7 @@
 package org.makechtec.web.authentication_gateway.app.lifecycle;
 
-import org.makechtec.web.authentication_gateway.validation.rate_limit.RateLimitRegistry;
-import org.makechtec.web.authentication_gateway.validation.rate_limit.RateLimitTimeUnit;
+import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitRegistry;
+import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitTimeUnit;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
