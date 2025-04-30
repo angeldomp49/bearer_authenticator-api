@@ -13,7 +13,7 @@ public class CacheSystemTable {
     private final ReentrantReadWriteLock callbackLock = new ReentrantReadWriteLock();
 
     public String request(String key) {
-        if (!this.contains(key)) {
+        if (this.nonContains(key)) {
             var callback = this.getCallback(key);
             this.put(key, callback.fill());
         }
