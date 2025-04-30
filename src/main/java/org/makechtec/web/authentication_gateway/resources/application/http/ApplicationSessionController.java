@@ -101,7 +101,7 @@ public class ApplicationSessionController {
         var token = applicationAuthorization.replace("Bearer ", "").trim();
 
 
-        boolean isValidToken = false;
+        boolean isValidToken;
 
         try {
             isValidToken = controllerValidatorFactory.getSessionAuthenticator().isValidJWTSignature(token);

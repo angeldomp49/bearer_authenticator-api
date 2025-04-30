@@ -24,15 +24,13 @@ public class ClientSessionController {
     private final CommonJSONResponseBuilder commonJSONResponseBuilder;
     private final ControllerValidatorFactory validatorFactory;
     private final CacheSystemTable cacheSystemTable;
-    private final RandomStringGenerator randomStringGenerator;
 
     @Autowired
-    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable, RandomStringGenerator randomStringGenerator) {
+    public ClientSessionController(HttpServletRequest request, CommonJSONResponseBuilder commonJSONResponseBuilder, ControllerValidatorFactory validatorFactory, CacheSystemTable cacheSystemTable ) {
         this.request = request;
         this.commonJSONResponseBuilder = commonJSONResponseBuilder;
         this.validatorFactory = validatorFactory;
         this.cacheSystemTable = cacheSystemTable;
-        this.randomStringGenerator = randomStringGenerator;
     }
 
 
