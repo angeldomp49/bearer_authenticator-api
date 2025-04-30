@@ -32,7 +32,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     implementation("de.mkammerer:argon2-jvm:2.11")
     implementation("org.makechtec.software:sql_support:3.0.0-beta")
-    implementation("org.makechtec.bearer_authentication:tools:1.4.1")
+    implementation("org.makechtec.bearer_authentication:tools:1.4.2")
 }
 
 tasks.named('test') {

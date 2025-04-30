@@ -1,17 +1,21 @@
 package org.makechtec.web.authentication_gateway.app.dependency_injection;
 
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.ArgonSettings;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasher;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SignaturePrinter;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.csrf.CSRFTokenGenerator;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.token.JWTTokenGenerator;
 import org.makechtec.software.sql_support.ConnectionInformation;
 import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
+import org.makechtec.software.sql_support.connection_pool.postgres.PostgresPooledConnectionCreator;
 import org.makechtec.web.authentication_gateway.app.properties.AuthenticationConnectionInformation;
 import org.makechtec.web.authentication_gateway.app.properties.CrypographyInformation;
-import org.makechtec.web.authentication_gateway.bearer.BearerAuthenticationFactory;
+import org.makechtec.web.authentication_gateway.commons.components.address.AddressBlackListValidator;
+import org.makechtec.web.authentication_gateway.commons.components.csrf.CommonHeaderCSRFValidator;
+import org.makechtec.web.authentication_gateway.commons.components.rate_limit.CommonRateLimitValidator;
 import org.makechtec.web.authentication_gateway.commons.components.rate_limit.RateLimitRegistry;
+import org.makechtec.web.authentication_gateway.commons.components.session.CommonSessionValidator;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
-import org.makechtec.web.authentication_gateway.resources.application.validation.ApplicationRateLimitValidator;
+import org.makechtec.web.authentication_gateway.commons.http.validators.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,26 +23,47 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceProvider {
 
     @Bean
-    public PasswordHasher passwordHasher() {
+    public ControllerValidatorFactory controllerValidatorFactory() {
+        return new ControllerValidatorFactory() {
+            @Override
+            public RateLimitValidator getRateLimitValidator() {
+                return new CommonRateLimitValidator(
+                        connectionPool(),
+                        rateLimiter()
+                );
+            }
+
+            @Override
+            public ResourceSessionValidator getSessionAuthenticator() {
+                return new CommonSessionValidator(
+                        connectionPool(),
+                        passwordHasherNative(),
+                        new JWTTokenGenerator()
+                );
+            }
+
+            @Override
+            public CSRFValidator getCSRFValidator() {
+                return new CommonHeaderCSRFValidator(
+                        new CSRFTokenGenerator()
+                );
+            }
+
+            @Override
+            public IPBlackListValidator getIPBlackListValidator() {
+                return new AddressBlackListValidator(
+                        connectionPool()
+                );
+            }
+        };
+    }
+
+    @Bean
+    public PasswordHasherNative passwordHasherNative() {
         return new PasswordHasherNative(new ArgonSettings(
                 65000,
                 1000
         ));
-    }
-
-    @Bean
-    public ApplicationRateLimitValidator applicationRateLimitValidator() {
-        return new ApplicationRateLimitValidator(
-
-        );
-    }
-
-    @Bean
-    public BearerAuthenticationFactory bearerAuthenticationFactory() {
-        return new BearerAuthenticationFactory(
-                connectionInformation(),
-                new SignaturePrinter(this.crypographyInformation().getSecretKey()),
-                passwordHasher());
     }
 
     @Bean
@@ -53,7 +78,6 @@ public class ServiceProvider {
         );
     }
 
-
     @Bean
     public AuthenticationConnectionInformation authenticationConnectionInformation() {
         return new AuthenticationConnectionInformation();
@@ -64,15 +88,19 @@ public class ServiceProvider {
         return new CrypographyInformation();
     }
 
-
     @Bean
     public RateLimitRegistry rateLimiter() {
-        return new RateLimitRegistry(this.connectionInformation());
+        return new RateLimitRegistry(this.connectionPool());
     }
 
     @Bean
     public ConnectionPool connectionPool() {
-        return new ConnectionPool();
+        return new ConnectionPool(
+                8,
+                new PostgresPooledConnectionCreator(
+                        connectionInformation()
+                )
+        );
     }
 
     @Bean
