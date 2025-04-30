@@ -7,7 +7,12 @@ plugins {
 
 group = 'org.makechtec.web'
 version = '4.0.0'
-sourceCompatibility = '17'
+
+java{
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 repositories {
     mavenCentral()
