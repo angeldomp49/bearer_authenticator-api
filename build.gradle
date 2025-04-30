@@ -26,7 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'com.google.guava:guava:30.1.1-jre'
+    implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.json:json:20231013")
     implementation("org.makechtec.software:json_tree:3.0.0")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
