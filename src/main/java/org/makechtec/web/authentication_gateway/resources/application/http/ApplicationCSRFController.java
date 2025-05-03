@@ -1,9 +1,11 @@
 package org.makechtec.web.authentication_gateway.resources.application.http;
 
+import com.google.errorprone.annotations.Var;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
 import org.makechtec.web.authentication_gateway.commons.http.CommonJSONResponseBuilder;
+import org.makechtec.web.authentication_gateway.commons.http.ParallelValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 @RequestMapping("application/csrf")
@@ -23,7 +28,7 @@ import java.util.logging.Logger;
 public class ApplicationCSRFController {
 
     public static final String RATE_LIMIT_DEFINITION_NAME = "application-csrf-controller";
-    private static final Logger LOG = Logger.getLogger(ApplicationCSRFController.class.getName());
+    public static final String IP_BLACKLIST_TAG = "application-ip-tag";
     private final ControllerValidatorFactory controllerValidatorFactory;
     private final CommonJSONResponseBuilder commonJSONResponseBuilder;
     private final HttpServletRequest request;
@@ -49,57 +54,58 @@ public class ApplicationCSRFController {
         rateLimitInformation.put("applicationIP", applicationIP);
         rateLimitInformation.put("applicationAgent", applicationAgent);
 
+        var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
+
         try {
-
-            CompletableFuture<Boolean> rateLimitFuture = CompletableFuture.supplyAsync(() -> {
-                try {
-
-                    return controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
-                } catch (ControllerValidationException e) {
-                    return false;
+            final var rateLimitValidationFuture = CompletableFuture.runAsync(() -> {
+                final var result = !controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
+                
+                if(result) {
+                    throw new ParallelValidationException(
+                            commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.TOO_MANY_REQUESTS)
+                    );
                 }
             });
 
-            CompletableFuture<String> tokenFuture = CompletableFuture.supplyAsync(() ->
-                    controllerValidatorFactory.getCSRFValidator()
-                            .generateCSRFToken(
-                                    cacheSystemTable.request("temporaryApplicationSecretKey")
-                            )
+            final var iPValidationFuture = CompletableFuture.runAsync(() -> {
+                final var result = !controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP, IP_BLACKLIST_TAG);
+
+                if(result) {
+                    throw new ParallelValidationException(
+                            commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.UNAUTHORIZED)
+                    );
+                }
+            });
+            
+            CompletableFuture.allOf(rateLimitValidationFuture, iPValidationFuture).join();
+
+
+            
+            final var sumOneAttemptFuture = CompletableFuture.runAsync(() ->
+                    controllerValidatorFactory.getRateLimitValidator()
+                            .sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)
             );
-
-
-            var isAllowed = controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP);
-
-            if (!isAllowed) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            }
-
-            if (!rateLimitFuture.join()) {
-                return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
-            }
-
-            var token = tokenFuture.join();
-
-            CompletableFuture.supplyAsync(() -> {
-                try {
-                    controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
-                    return null;
-                } catch (ControllerValidationException e) {
-                    LOG.severe("Error pushing attempt for client: " + e.getMessage());
-                    return null;
-                }
-            });
+            
+            var token = controllerValidatorFactory.getCSRFValidator().generateCSRFToken(secretKey);
 
             var message =
                     ObjectLeafBuilder.builder()
                             .put("token", token)
                             .build();
+            
+            sumOneAttemptFuture.join();
 
             return new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK);
 
         } catch (ControllerValidationException e) {
-            LOG.severe("Error generating CSRF token: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ParallelValidationException e) {
+            return e.getResponse();
+        } catch (CompletionException e) {
+            return new ResponseEntity<>(
+                    commonJSONResponseBuilder.createResponseWithMessage(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
 
 

@@ -3,6 +3,7 @@ plugins {
     id 'war'
     id 'org.springframework.boot' version '3.0.6'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'jacoco'
 }
 
 group = 'org.makechtec.web'
@@ -28,18 +29,31 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    testImplementation("org.springframework.boot:spring-boot-starter-test"){
+        exclude([
+                "group": "com.vaadin.external.google",
+                 "module":"android-json"
+        ])
+    }
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.json:json:20231013")
     implementation("org.makechtec.software:json_tree:3.0.0")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     implementation("de.mkammerer:argon2-jvm:2.11")
-    implementation("org.makechtec.software:sql_support:3.0.0-beta")
+    implementation("org.makechtec.software:sql_support:3.0.4-BETA")
+    testImplementation("org.makechtec.software:sql_support_testing:1.0.0-BETA")
     implementation("org.makechtec.bearer_authentication:tools:1.4.2")
+    
 }
 
 tasks.named('test') {
+    finalizedBy(tasks.jacocoTestReport)
     useJUnitPlatform()
+}
+
+tasks.jacocoTestReport{
+    dependsOn(tasks.test)
 }

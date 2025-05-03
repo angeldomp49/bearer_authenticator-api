@@ -16,24 +16,25 @@ public class RateLimitRegistry {
         this.connectionPool = connectionPool;
     }
 
-    public void registerNewRateLimit(String title, int attempts, RateLimitTimeUnit timeUnit, int timeQuantity) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void registerNewRateLimit(RateLimitSchema rateLimitSchema) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         try {
 
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.rate_limits(title, attempts, unit, time_quantity)
-                            VALUES(?,?,?,?)
+                            INSERT INTO atepoztli__authentication_service__schema.rate_limits(title, attempts, unit, time_quantity, schema)
+                            VALUES(?,?,?,?,?)
                             ON CONFLICT (title) DO NOTHING;
                             """)
-                    .addParamAtPosition(1, title, ParamType.TYPE_STRING)
-                    .addParamAtPosition(2, attempts, ParamType.TYPE_INTEGER)
-                    .addParamAtPosition(3, timeUnit.getName(), ParamType.TYPE_STRING)
-                    .addParamAtPosition(4, timeQuantity, ParamType.TYPE_INTEGER)
+                    .addParamAtPosition(1, rateLimitSchema.rateLimit().title(), ParamType.TYPE_STRING)
+                    .addParamAtPosition(2, rateLimitSchema.rateLimit().attempts(), ParamType.TYPE_INTEGER)
+                    .addParamAtPosition(3, rateLimitSchema.rateLimit().unit(), ParamType.TYPE_STRING)
+                    .addParamAtPosition(4, rateLimitSchema.rateLimit().timeQuantity(), ParamType.TYPE_INTEGER)
+                    .addParamAtPosition(5, rateLimitSchema.schema(), ParamType.TYPE_STRING)
                     .update();
 
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.severe("There was a problem registering rate limit record in database for title: " + title);
+            LOG.severe("There was a problem registering rate limit record in database for title: " + rateLimitSchema.rateLimit().title());
             throw e;
         }
     }

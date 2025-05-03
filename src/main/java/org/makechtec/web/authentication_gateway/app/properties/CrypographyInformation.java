@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class CrypographyInformation {
 
-    @Value("${cryptography.secret-key}")
-    private String secretKey;
     @Value("${cryptography.argon2.settings.memory-in-kb}")
     private int argon2SettingsMemory;
     @Value("${cryptography.argon2.settings.iterations}")
@@ -13,13 +11,6 @@ public class CrypographyInformation {
     @Value("${cryptography.argon2.settings.parallelism-factor}")
     private int argon2SettingsParallelismFactor;
 
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
 
     public int getArgon2SettingsMemory() {
         return argon2SettingsMemory;
