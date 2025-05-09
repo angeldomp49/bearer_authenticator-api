@@ -7,7 +7,8 @@ import org.makechtec.web.authentication_gateway.commons.http.validators.Controll
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,20 +17,20 @@ class AddressBlackListValidatorTest {
 
     @Test
     void isValidIP() throws SQLException {
-        
+
         var resultSetMock = mock(ResultSet.class);
-        
+
         when(resultSetMock.getInt(anyString()))
                 .thenReturn(1);
-        
+
         var connectionPool = new ConnectionPoolMock();
-        
+
         connectionPool.setResultSetMock(resultSetMock);
-        
+
         var addressBlackListValidator = new AddressBlackListValidator(connectionPool);
-        
+
         var result = addressBlackListValidator.isValidIP("127.0.0.1");
-        
+
         assertTrue(result);
     }
 
@@ -50,7 +51,7 @@ class AddressBlackListValidatorTest {
         var result = addressBlackListValidator.isValidIP("127.0.0.1", "tag");
 
         assertTrue(result);
-        
+
     }
 
 
@@ -66,8 +67,8 @@ class AddressBlackListValidatorTest {
         var addressBlackListValidator = new AddressBlackListValidator(connectionPool);
 
         assertThrows(ControllerValidationException.class, () -> addressBlackListValidator.isValidIP("127.0.0.1", "tag"));
-        
+
 
     }
-    
+
 }

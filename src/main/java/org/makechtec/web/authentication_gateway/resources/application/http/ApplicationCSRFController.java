@@ -1,6 +1,5 @@
 package org.makechtec.web.authentication_gateway.resources.application.http;
 
-import com.google.errorprone.annotations.Var;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
@@ -16,12 +15,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
 
 @RequestMapping("application/csrf")
 @RestController
@@ -59,8 +55,8 @@ public class ApplicationCSRFController {
         try {
             final var rateLimitValidationFuture = CompletableFuture.runAsync(() -> {
                 final var result = !controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
-                
-                if(result) {
+
+                if (result) {
                     throw new ParallelValidationException(
                             commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.TOO_MANY_REQUESTS)
                     );
@@ -70,29 +66,28 @@ public class ApplicationCSRFController {
             final var iPValidationFuture = CompletableFuture.runAsync(() -> {
                 final var result = !controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP, IP_BLACKLIST_TAG);
 
-                if(result) {
+                if (result) {
                     throw new ParallelValidationException(
                             commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.UNAUTHORIZED)
                     );
                 }
             });
-            
+
             CompletableFuture.allOf(rateLimitValidationFuture, iPValidationFuture).join();
 
 
-            
             final var sumOneAttemptFuture = CompletableFuture.runAsync(() ->
                     controllerValidatorFactory.getRateLimitValidator()
                             .sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)
             );
-            
+
             var token = controllerValidatorFactory.getCSRFValidator().generateCSRFToken(secretKey);
 
             var message =
                     ObjectLeafBuilder.builder()
                             .put("token", token)
                             .build();
-            
+
             sumOneAttemptFuture.join();
 
             return new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.OK), HttpStatus.OK);

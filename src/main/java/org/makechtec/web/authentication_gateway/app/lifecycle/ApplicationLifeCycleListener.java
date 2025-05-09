@@ -43,9 +43,9 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
                             }
                             """,
                     new RateLimit(
-                            "login", 
-                            5, 
-                            RateLimitTimeUnit.MINUTE.getName(), 
+                            "login",
+                            5,
+                            RateLimitTimeUnit.MINUTE.getName(),
                             15
                     )
             ));
@@ -57,9 +57,9 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
                                     }
                                     """,
                             new RateLimit(
-                                    "register", 
-                                    5, 
-                                    RateLimitTimeUnit.MINUTE.getName(), 
+                                    "register",
+                                    5,
+                                    RateLimitTimeUnit.MINUTE.getName(),
                                     15
                             )
                     )
@@ -72,9 +72,9 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
                                     }
                                     """,
                             new RateLimit(
-                                    "csrf", 
-                                    5, 
-                                    RateLimitTimeUnit.MINUTE.getName(), 
+                                    "csrf",
+                                    5,
+                                    RateLimitTimeUnit.MINUTE.getName(),
                                     15
                             )
                     )

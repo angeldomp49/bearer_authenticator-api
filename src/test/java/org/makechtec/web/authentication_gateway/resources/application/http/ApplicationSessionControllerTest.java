@@ -13,7 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -30,7 +29,7 @@ class ApplicationSessionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    
+
     @MockBean
     private ControllerValidatorFactory controllerValidatorFactory;
 
@@ -40,8 +39,7 @@ class ApplicationSessionControllerTest {
     @MockBean
     private CacheSystemTable cacheSystemTable;
 
-    
-    
+
     @Test
     void loginByUserRequest() {
     }
@@ -51,11 +49,11 @@ class ApplicationSessionControllerTest {
 
         when(responseBuilder.createResponse(any(ObjectLeaf.class), any(HttpStatus.class)))
                 .thenCallRealMethod();
-        
+
         final var sessionValidator = mock(ResourceSessionValidator.class);
-        
+
         when(sessionValidator.isValidJWTSignature(anyString())).thenReturn(true);
-        
+
         when(controllerValidatorFactory.getSessionAuthenticator()).thenReturn(sessionValidator);
 
         var expectedNodes = "$.body['data', 'statusCode']";
@@ -67,5 +65,5 @@ class ApplicationSessionControllerTest {
                 .andExpect(jsonPath(expectedNodes).exists())
                 .andExpect(jsonPath(expectedMessageNode).exists());
     }
-    
+
 }

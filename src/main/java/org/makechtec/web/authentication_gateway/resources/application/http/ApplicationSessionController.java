@@ -1,6 +1,5 @@
 package org.makechtec.web.authentication_gateway.resources.application.http;
 
-import com.google.errorprone.annotations.Var;
 import jakarta.servlet.http.HttpServletRequest;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.web.authentication_gateway.commons.components.cache.CacheSystemTable;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.logging.Logger;
 
 @RequestMapping("application/session")
 @RestController
@@ -58,7 +56,7 @@ public class ApplicationSessionController {
             rateLimitInformation.put("applicationAgent", applicationAgent);
 
             var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
-            
+
             final var rateLimitValidationFuture = CompletableFuture.runAsync(() -> {
                 final var result = !controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
                 if (result) {
@@ -85,16 +83,16 @@ public class ApplicationSessionController {
                             ObjectLeafBuilder.builder()
                                     .put("message", "Username or password are invalid")
                                     .build();
-                    
+
                     throw new ParallelValidationException(
                             new ResponseEntity<>(commonJSONResponseBuilder.createResponse(message, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED)
                     );
                 }
             });
-            
+
             final var iPValidationFuture = CompletableFuture.runAsync(() -> {
                 final var result = !controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP, IP_TAG);
-                
+
                 if (result) {
 
                     throw new ParallelValidationException(
@@ -102,12 +100,11 @@ public class ApplicationSessionController {
                     );
                 }
             });
-            
-            
-            
+
+
             CompletableFuture.allOf(rateLimitValidationFuture, csrfValidationFuture, sessionValidationFuture, iPValidationFuture).join();
 
-            
+
             final var sumOneAttemptFuture = CompletableFuture.runAsync(() ->
                     controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)
             );
@@ -116,9 +113,9 @@ public class ApplicationSessionController {
             final var token = controllerValidatorFactory.getSessionAuthenticator().createJWT(session);
 
             final var message = ObjectLeafBuilder.builder()
-                            .put("token", token)
-                            .build();
-            
+                    .put("token", token)
+                    .build();
+
 
             sumOneAttemptFuture.join();
 
@@ -128,7 +125,7 @@ public class ApplicationSessionController {
             return commonJSONResponseBuilder.createResponseWithStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (ParallelValidationException e) {
             return e.getResponse();
-        }  catch (CompletionException e) {
+        } catch (CompletionException e) {
             return new ResponseEntity<>(
                     commonJSONResponseBuilder.createResponseWithMessage(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR),
                     HttpStatus.INTERNAL_SERVER_ERROR

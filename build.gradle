@@ -9,7 +9,7 @@ plugins {
 group = 'org.makechtec.web'
 version = '4.0.0'
 
-java{
+java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
@@ -29,13 +29,13 @@ repositories {
 }
 
 dependencies {
-    
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-    testImplementation("org.springframework.boot:spring-boot-starter-test"){
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude([
-                "group": "com.vaadin.external.google",
-                 "module":"android-json"
+                "group" : "com.vaadin.external.google",
+                "module": "android-json"
         ])
     }
     implementation("com.google.guava:guava:33.4.8-jre")
@@ -46,7 +46,7 @@ dependencies {
     implementation("org.makechtec.software:sql_support:3.0.4-BETA")
     testImplementation("org.makechtec.software:sql_support_testing:1.0.0-BETA")
     implementation("org.makechtec.bearer_authentication:tools:1.4.2")
-    
+
 }
 
 tasks.named('test') {
@@ -54,6 +54,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.jacocoTestReport{
+tasks.jacocoTestReport {
     dependsOn(tasks.test)
 }

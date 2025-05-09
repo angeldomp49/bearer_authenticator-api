@@ -11,37 +11,37 @@ import org.springframework.context.annotation.Bean;
 
 import java.sql.ResultSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 class ServiceProviderTest {
-    
+
     @Autowired
     private ControllerValidatorFactory controllerValidatorFactory;
 
     @Test
     void getService() {
-        
-        
+
+
         assertNotNull(controllerValidatorFactory.getRateLimitValidator());
         assertNotNull(controllerValidatorFactory.getCSRFValidator());
         assertNotNull(controllerValidatorFactory.getIPBlackListValidator());
         assertNotNull(controllerValidatorFactory.getSessionAuthenticator());
-        
+
         System.out.println("Successful loaded the test context");
     }
-    
+
     @TestConfiguration
-    public static class MockFactory{
-        
+    public static class MockFactory {
+
         @Bean
-        public ConnectionPool connectionPool(){
+        public ConnectionPool connectionPool() {
             final var connectionPool = new ConnectionPoolMock();
             connectionPool.setResultSetMock(mock(ResultSet.class));
             return connectionPool;
         }
-        
+
     }
-    
+
 }

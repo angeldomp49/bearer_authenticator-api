@@ -30,8 +30,8 @@ public class CommonJSONResponseBuilder {
                 status
         );
     }
-    
-    public ResponseEntity<String> createResponseWithStatus(HttpStatus status){
+
+    public ResponseEntity<String> createResponseWithStatus(HttpStatus status) {
         return new ResponseEntity<>(
                 createResponseWithMessage(
                         status.getReasonPhrase(),
@@ -39,5 +39,5 @@ public class CommonJSONResponseBuilder {
                 status
         );
     }
-    
+
 }
