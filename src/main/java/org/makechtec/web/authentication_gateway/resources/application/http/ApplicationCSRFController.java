@@ -64,7 +64,7 @@ public class ApplicationCSRFController {
             });
 
             final var iPValidationFuture = CompletableFuture.runAsync(() -> {
-                final var result = !controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP, IP_BLACKLIST_TAG);
+                final var result = controllerValidatorFactory.getIPBlackListValidator().isForbiddenIP(applicationIP, IP_BLACKLIST_TAG);
 
                 if (result) {
                     throw new ParallelValidationException(

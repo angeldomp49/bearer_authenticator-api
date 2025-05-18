@@ -43,7 +43,7 @@ public class ApplicationSessionController {
             @RequestHeader("Application-X-Csrf-Token") String applicationXCsrfToken,
 
             @RequestParam("accessKey") String accessKey,
-            @RequestParam("secret") String secret
+            @RequestParam("secretKey") String secretKey
     ) {
 
         var applicationIP = request.getRemoteAddr();
@@ -55,10 +55,14 @@ public class ApplicationSessionController {
             rateLimitInformation.put("applicationIP", applicationIP);
             rateLimitInformation.put("applicationAgent", applicationAgent);
 
-            var secretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
+            var temporaryApplicationSecretKey = cacheSystemTable.request("temporaryApplicationSecretKey");
 
             final var rateLimitValidationFuture = CompletableFuture.runAsync(() -> {
+                var initTime = System.currentTimeMillis();
                 final var result = !controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
+                var finalTime = System.currentTimeMillis();
+                
+                System.out.println("rateLimitValidationFuture time: " + (finalTime - initTime));
                 if (result) {
                     throw new ParallelValidationException(
                             new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS)
@@ -67,7 +71,11 @@ public class ApplicationSessionController {
             });
 
             final var csrfValidationFuture = CompletableFuture.runAsync(() -> {
-                final var result = !controllerValidatorFactory.getCSRFValidator().nonValidCSRF(applicationXCsrfToken, secretKey);
+                var initTime = System.currentTimeMillis();
+                final var result = controllerValidatorFactory.getCSRFValidator().nonValidCSRF(applicationXCsrfToken, temporaryApplicationSecretKey);
+                var finalTime = System.currentTimeMillis();
+
+                System.out.println("csrfValidationFuture time: " + (finalTime - initTime));
                 if (result) {
                     throw new ParallelValidationException(
                             new ResponseEntity<>(HttpStatus.UNAUTHORIZED)
@@ -76,7 +84,11 @@ public class ApplicationSessionController {
             });
 
             final var sessionValidationFuture = CompletableFuture.runAsync(() -> {
-                final var result = !controllerValidatorFactory.getSessionAuthenticator().areValidCredentials(accessKey, secret, RESOURCE_KIND);
+                var initTime = System.currentTimeMillis();
+                final var result = !controllerValidatorFactory.getSessionAuthenticator().areValidCredentials(accessKey, secretKey, RESOURCE_KIND);
+                var finalTime = System.currentTimeMillis();
+
+                System.out.println("sessionValidationFuture time: " + (finalTime - initTime));
                 if (result) {
 
                     var message =
@@ -91,8 +103,11 @@ public class ApplicationSessionController {
             });
 
             final var iPValidationFuture = CompletableFuture.runAsync(() -> {
-                final var result = !controllerValidatorFactory.getIPBlackListValidator().isValidIP(applicationIP, IP_TAG);
+                var initTime = System.currentTimeMillis();
+                final var result = controllerValidatorFactory.getIPBlackListValidator().isForbiddenIP(applicationIP, IP_TAG);
+                var finalTime = System.currentTimeMillis();
 
+                System.out.println("iPValidationFuture time: " + (finalTime - initTime));
                 if (result) {
 
                     throw new ParallelValidationException(
@@ -109,8 +124,12 @@ public class ApplicationSessionController {
                     controllerValidatorFactory.getRateLimitValidator().sumOneAttempt(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME)
             );
 
+            var initTime = System.currentTimeMillis();
             final var session = controllerValidatorFactory.getSessionAuthenticator().createSession(accessKey);
             final var token = controllerValidatorFactory.getSessionAuthenticator().createJWT(session);
+            var finalTime = System.currentTimeMillis();
+
+            System.out.println("session token time: " + (finalTime - initTime));
 
             final var message = ObjectLeafBuilder.builder()
                     .put("token", token)

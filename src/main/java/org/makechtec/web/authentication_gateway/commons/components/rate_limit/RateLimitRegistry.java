@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class RateLimitRegistry {
+    
+    private static final String SCHEMA = "atepoztli__authentication_service__schema";
+    private static final String RATE_LIMITS_TABLE = "rate_limit__rate_limits";
 
     private static final Logger LOG = Logger.getLogger(RateLimitRegistry.class.getName());
     private final ConnectionPool connectionPool;
@@ -21,11 +24,11 @@ public class RateLimitRegistry {
 
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
-                    .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.rate_limits(title, attempts, unit, time_quantity, schema)
-                            VALUES(?,?,?,?,?)
-                            ON CONFLICT (title) DO NOTHING;
-                            """)
+                    .queryString(String.format("""
+                            INSERT INTO %s.%s(title, attempts, unit, time_quantity, schema)
+                            VALUES(?,?,?,?,?::json)
+                                ON CONFLICT (title) DO NOTHING;
+                            """, SCHEMA, RATE_LIMITS_TABLE))
                     .addParamAtPosition(1, rateLimitSchema.rateLimit().title(), ParamType.TYPE_STRING)
                     .addParamAtPosition(2, rateLimitSchema.rateLimit().attempts(), ParamType.TYPE_INTEGER)
                     .addParamAtPosition(3, rateLimitSchema.rateLimit().unit(), ParamType.TYPE_STRING)

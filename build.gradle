@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'org.makechtec.web'
-version = '4.0.0'
+version = '4.0.1'
 
 java {
     toolchain {
@@ -17,6 +17,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 
     maven {
         url =
@@ -43,17 +44,28 @@ dependencies {
     implementation("org.makechtec.software:json_tree:3.0.0")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     implementation("de.mkammerer:argon2-jvm:2.11")
-    implementation("org.makechtec.software:sql_support:3.0.4-BETA")
+    implementation("org.makechtec.software:sql_support:3.0.6-BETA")
     testImplementation("org.makechtec.software:sql_support_testing:1.0.0-BETA")
-    implementation("org.makechtec.bearer_authentication:tools:1.4.2")
-
+    implementation("org.makechtec.bearer_authentication:tools:1.4.3")
+    testImplementation("org.concordion:concordion:4.0.1")
 }
 
 tasks.named('test') {
     finalizedBy(tasks.jacocoTestReport)
+    exclude '**/sql_tests/**/*.class'
     useJUnitPlatform()
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+}
+
+tasks.register('sqlTests'){
+    include("**/sql_tests/**/*.class")
+    useJunitPlatform()
+}
+
+tasks.register('integrationTests'){
+    include("**/integration/**/*.class")
+    useJunitPlatform()
 }

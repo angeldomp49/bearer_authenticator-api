@@ -111,7 +111,7 @@ public class ServiceProvider {
     @Bean
     public ConnectionPool connectionPool() {
         return new ConnectionPool(
-                8,
+                Runtime.getRuntime().availableProcessors(),
                 new PostgresPooledConnectionCreator(
                         connectionInformation()
                 )
@@ -137,4 +137,5 @@ public class ServiceProvider {
     public SaltGenerator saltGenerator() {
         return new SaltGenerator();
     }
+    
 }

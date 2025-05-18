@@ -6,4 +6,5 @@ public interface IPBlackListValidator {
 
     boolean isValidIP(String ip, String tag) throws ControllerValidationException;
 
+    boolean isForbiddenIP(String ip, String tag) throws ControllerValidationException;
 }

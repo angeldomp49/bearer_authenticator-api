@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class CommonRateLimitValidator implements RateLimitValidator {
+    
+    private static final String SCHEMA = "atepoztli__authentication_service__schema";
+    private static final String CLIENT_ATTEMPTS_TABLE = "rate_limit__client_attempts";
+    private static final String RATE_LIMITS_TABLE = "rate_limit__rate_limits";
 
     private static final Logger LOG = Logger.getLogger(CommonRateLimitValidator.class.getName());
     private final ConnectionPool connectionPool;
@@ -36,14 +40,14 @@ public class CommonRateLimitValidator implements RateLimitValidator {
             var beforeLimitFilter = registry.calculateFilterForTime(totalOfAttemptsAvailable.rateLimit());
 
 
-            var queryWithTimeFilter = """
+            var queryWithTimeFilter = String.format("""
                     SELECT COUNT(*) AS result
-                    FROM atepoztli__authentication_service__schema.rate_limit__client_attempts
+                    FROM %s.%s
                     where title = ?
-                    AND atepoztli__authentication_service__schema.rate_limit__compare_schema(?, ?)
-                    AND created_at >= (NOW() - INTERVAL '${timeFilter}');
-                    """
-                    .replace("${timeFilter}", beforeLimitFilter);
+                    AND %s.rate_limit__compare_schema(?::json, ?::json)
+                    AND created_at >= (NOW() - INTERVAL '%s');
+                    """, SCHEMA, CLIENT_ATTEMPTS_TABLE, SCHEMA, beforeLimitFilter
+            );
 
             var alreadyUsedAttempts =
                     new WithPoolEngine<Integer>(connectionPool)
@@ -69,11 +73,11 @@ public class CommonRateLimitValidator implements RateLimitValidator {
     private RateLimitSchema getTotalOfAttemptsAvailable(String rateLimitDefinitionName) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WithPoolEngine<RateLimitSchema>(connectionPool)
                 .isPrepared()
-                .queryString("""
+                .queryString(String.format("""
                         SELECT title, attempts, unit, time_quantity, schema
-                        FROM atepoztli__authentication_service__schema.rate_limit__rate_limits
+                        FROM %s.%s
                         WHERE title = ?;
-                        """)
+                        """,SCHEMA, RATE_LIMITS_TABLE))
                 .addParamAtPosition(1, rateLimitDefinitionName, ParamType.TYPE_STRING)
                 .run(resultSet -> {
                     resultSet.next();
@@ -98,10 +102,10 @@ public class CommonRateLimitValidator implements RateLimitValidator {
 
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
-                    .queryString("""
-                            INSERT INTO atepoztli__authentication_service__schema.client_attempts(title, obj)
-                            VALUES(?,?);
-                            """)
+                    .queryString(String.format("""
+                            INSERT INTO %s.%s(title, obj)
+                            VALUES(?,?::json);
+                            """, SCHEMA, CLIENT_ATTEMPTS_TABLE))
                     .addParamAtPosition(1, rateLimitDefinitionName, ParamType.TYPE_STRING)
                     .addParamAtPosition(2, filtersJson.getLeafValue(), ParamType.TYPE_STRING)
                     .update();

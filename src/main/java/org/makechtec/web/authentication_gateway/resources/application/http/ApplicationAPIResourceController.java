@@ -100,7 +100,7 @@ public class ApplicationAPIResourceController {
 
             var salt = saltGenerator.generate();
 
-            var rawHashed = passwordHasher.rawHashNotIncludingSalt(secret, salt);
+            var rawHashed = passwordHasher.rawHash(secret, salt);
 
             applicationDBConnection.store(new ApplicationModel(
                     accessKey,

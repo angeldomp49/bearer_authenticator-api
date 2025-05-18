@@ -1,8 +1,12 @@
 package org.makechtec.web.authentication_gateway.commons.components.session;
 
+import org.bouncycastle.util.encoders.Hex;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.ArgonSettings;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
+import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.token.JWTTokenGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SessionInformation;
+import org.makechtec.software.json_tree.ObjectLeaf;
 import org.makechtec.software.json_tree.builders.ArrayStringLeafBuilder;
 import org.makechtec.software.json_tree.builders.ObjectLeafBuilder;
 import org.makechtec.software.sql_support.connection_pool.ConnectionPool;
@@ -11,13 +15,24 @@ import org.makechtec.software.sql_support.query_process.statement.ParamType;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ControllerValidationException;
 import org.makechtec.web.authentication_gateway.commons.http.validators.ResourceSessionValidator;
 
+import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 public class CommonSessionValidator implements ResourceSessionValidator {
+    
+    private static final String DATABASE_NAME = "base_database";
+    private static final String SCHEMA_NAME = "atepoztli__authentication_service__schema";
+    private static final String SESSIONS_TABLE = "resource__sessions";
+    private static final String SECRET_KEYS_TABLE = "resource__secret_keys";
+    private static final String RESOURCES_TABLE = "resource__resources";
+    private static final String PIVOT_RESOURCE_ROLE_TABLE = "resource__resource_role";
+    private static final String PIVOT_ROLE_PERMISSION_TABLE = "resource__role_permission";
+    private static final String PERMISSIONS_TABLE = "resource__permissions";
 
     private static final int SESSION_EXPIRATION_DAYS = 30;
     private static final Logger LOG = Logger.getLogger(CommonSessionValidator.class.getName());
@@ -36,7 +51,8 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         try {
             var resourceModel = find(accessKey, resourceKind);
 
-            return resourceModel.filter(value -> passwordHasher.matches(secret, new String(value.hashedSecret())))
+            var hashed = mergeHashedWithSalt(resourceModel);
+            return resourceModel.filter(value -> passwordHasher.matches(secret, hashed))
                     .isPresent();
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             LOG.severe("Error reading user for username");
@@ -52,35 +68,40 @@ public class CommonSessionValidator implements ResourceSessionValidator {
 
             var resourceInfo = new WithPoolEngine<Object[]>(connectionPool)
                     .isPrepared()
-                    .queryString("""
+                    .queryString(String.format("""
                             SELECT resource.id, resource.specific_attributes
-                            FROM base_database.atepoztli__authentication_service__schema.resource__resources AS resource
+                            FROM %s.%s.%s AS resource
                             WHERE resource.access_key = ?;
-                            """)
-                    .addParamAtPosition(1, accessKey, ParamType.TYPE_LONG)
+                            """, DATABASE_NAME, SCHEMA_NAME, RESOURCES_TABLE))
+                    .addParamAtPosition(1, accessKey, ParamType.TYPE_STRING)
                     .run(resultSet -> {
                         resultSet.next();
 
                         return new Object[]{
-                                resultSet.getLong("resource.id"),
-                                resultSet.getString("resource.specific_attributes")
+                                resultSet.getLong("id"),
+                                resultSet.getString("specific_attributes")
                         };
                     });
 
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
-                    .queryString("""
-                            SELECT permission.name
-                            FROM base_database.atepoztli__authentication_service__schema.resource__resources AS resource
-                                     INNER JOIN atepoztli__authentication_service__schema.resource_resource_role AS role
+                    .queryString(String.format("""
+                            SELECT permission.name, resource.id
+                            FROM %s.%s.%s AS resource
+                                     INNER JOIN %s.%s.%s AS role
                                                 ON role.resource_resource_id = resource.id
-                                     INNER JOIN atepoztli__authentication_service__schema.resource__role_permission AS role_permission
+                                     INNER JOIN %s.%s.%s AS role_permission
                                                 ON role_permission.resource_role_id = role.resource_role_id
-                                     INNER JOIN atepoztli__authentication_service__schema.resource__permissions AS permission
+                                     INNER JOIN %s.%s.%s AS permission
                                                 ON role_permission.resource_permission_id = permission.id
                             WHERE resource.access_key = ?;
-                            """)
-                    .addParamAtPosition(1, accessKey, ParamType.TYPE_LONG)
+                            """, 
+                            DATABASE_NAME, SCHEMA_NAME, RESOURCES_TABLE, 
+                            DATABASE_NAME, SCHEMA_NAME, PIVOT_RESOURCE_ROLE_TABLE, 
+                            DATABASE_NAME, SCHEMA_NAME, PIVOT_ROLE_PERMISSION_TABLE,
+                            DATABASE_NAME, SCHEMA_NAME, PERMISSIONS_TABLE
+                    ))
+                    .addParamAtPosition(1, accessKey, ParamType.TYPE_STRING)
                     .run(resultSet -> {
                         while (resultSet.next()) {
                             permissions.add(resultSet.getString("name"));
@@ -91,17 +112,19 @@ public class CommonSessionValidator implements ResourceSessionValidator {
 
             var expirationTime = Calendar.getInstance();
             expirationTime.add(Calendar.DAY_OF_MONTH, SESSION_EXPIRATION_DAYS);
+            
+            var permissionsString = permissionsJson(permissions).getLeafValue();
 
             var sessionId = new WithPoolEngine<Long>(connectionPool)
                     .isPrepared()
-                    .queryString("""
-                            INSERT INTO resource_sessions(resource_id, expiration_date, is_closed, permissions
-                            VALUES(?,?,?,?);
-                            """)
+                    .queryString(String.format("""
+                            INSERT INTO %s.%s.%s(resource_id, expiration_date, is_closed, permissions)
+                            VALUES(?,?,?,?::json);
+                            """, DATABASE_NAME, SCHEMA_NAME, SESSIONS_TABLE))
                     .addParamAtPosition(1, resourceInfo[0], ParamType.TYPE_LONG)
                     .addParamAtPosition(2, expirationTime.getTimeInMillis(), ParamType.TYPE_LONG)
-                    .addParamAtPosition(3, 0, ParamType.TYPE_INTEGER)
-                    .addParamAtPosition(4, permissions, ParamType.TYPE_STRING)
+                    .addParamAtPosition(3, false, ParamType.TYPE_BOOLEAN)
+                    .addParamAtPosition(4, permissionsString, ParamType.TYPE_STRING)
                     .updateWithGeneratedKey(resultSet -> {
                         resultSet.next();
                         return resultSet.getLong("id");
@@ -160,6 +183,7 @@ public class CommonSessionValidator implements ResourceSessionValidator {
 
     @Override
     public boolean isValidJWTSignature(String token) throws ControllerValidationException {
+        
         var id = tokenGenerator.getJWTPayload(token).getLong("resourceId");
         var personalSecretHashKey = resourceSecretHashKey(id);
 
@@ -170,13 +194,13 @@ public class CommonSessionValidator implements ResourceSessionValidator {
     private Optional<ResourceModel> find(String accessKey, String resourceKind) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         return
                 new WithPoolEngine<Optional<ResourceModel>>(connectionPool)
-                        .queryString("""
+                        .queryString(String.format("""
                                 SELECT id, kind, access_key, hashed_secret, salt, specific_attributes
-                                FROM atepoztli__authentication_service__schema.session__resources
+                                FROM %s.%s.%s
                                 WHERE kind = ?
                                 AND access_key = ?
                                 LIMIT 1;
-                                """)
+                                """, DATABASE_NAME, SCHEMA_NAME, RESOURCES_TABLE))
                         .addParamAtPosition(1, resourceKind, ParamType.TYPE_STRING)
                         .addParamAtPosition(2, accessKey, ParamType.TYPE_STRING)
                         .isPrepared()
@@ -189,7 +213,7 @@ public class CommonSessionValidator implements ResourceSessionValidator {
                                     new ResourceModel(
                                             resultSet.getLong("id"),
                                             resultSet.getString("kind"),
-                                            resultSet.getString("accessKey"),
+                                            resultSet.getString("access_key"),
                                             resultSet.getBytes("hashed_secret"),
                                             resultSet.getBytes("salt"),
                                             resultSet.getString("specific_attributes")
@@ -203,12 +227,12 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         try {
             return
                     new WithPoolEngine<Optional<String>>(connectionPool)
-                            .queryString("""
-                                    SELECT id, personal_secret_hash_key
-                                    FROM atepoztli__authentication_service__schema.resource__secret_keys
+                            .queryString(String.format("""
+                                    SELECT id, secret_key
+                                    FROM %s.%s.%s
                                     WHERE resource_id = ?
                                     LIMIT 1;
-                                    """)
+                                    """, DATABASE_NAME, SCHEMA_NAME, SECRET_KEYS_TABLE))
                             .addParamAtPosition(1, resourceId, ParamType.TYPE_LONG)
                             .isPrepared()
                             .run(resultSet -> {
@@ -216,7 +240,7 @@ public class CommonSessionValidator implements ResourceSessionValidator {
                                     return Optional.empty();
                                 }
 
-                                return Optional.of(resultSet.getString("personal_secret_hash_key"));
+                                return Optional.of(resultSet.getString("secret_key"));
 
                             });
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
@@ -224,4 +248,32 @@ public class CommonSessionValidator implements ResourceSessionValidator {
             throw new ControllerValidationException(e.getMessage());
         }
     }
+
+    private static byte[] mergeArrays(byte[] array1, byte[] array2) {
+        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
+        buffer.put(array1);
+        buffer.put(array2);
+        return buffer.array();
+    }
+
+    private static String mergeHashedWithSalt(Optional<ResourceModel> resourceModel) {
+        return new String(
+                Hex.encode(
+                        mergeArrays(
+                                resourceModel.get().hashedSecret(),
+                                resourceModel.get().salt()
+                        )
+                )
+        );
+    }
+    
+    private static ObjectLeaf permissionsJson(List<String> permissions) {
+        var permissionsArray = ArrayStringLeafBuilder.builder();
+        permissions.forEach(permissionsArray::add);
+        
+        return ObjectLeafBuilder.builder()
+                .put("permissions", permissionsArray.build())
+                .build();
+    }
+    
 }
