@@ -8,17 +8,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 class ApplicationDBConnectionTest {
-    
+
     @Autowired
     private ApplicationDBConnection db;
-    
+
     @Autowired
     private SaltGenerator saltGenerator;
-    
+
     @Autowired
     private PasswordHasherNative passwordHasher;
 
@@ -31,14 +29,14 @@ class ApplicationDBConnectionTest {
         var secret = "Hello World!";
 
         var rawHashed = passwordHasher.rawHashNotIncludingSalt(secret, salt);
-        
+
         db.store(new ApplicationModel(
                 accessKey,
                 rawHashed,
                 salt
         ));
-        
+
     }
-    
-    
+
+
 }

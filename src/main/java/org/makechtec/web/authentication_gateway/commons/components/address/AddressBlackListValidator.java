@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class AddressBlackListValidator implements IPBlackListValidator {
-    
+
     private static final String SCHEMA_NAME = "atepoztli__authentication_service__schema";
     private static final String ALLOWED_CLIENTS_TABLE = "black_list__allowed_clients";
     private static final String FORBIDDEN_CLIENTS_TABLE = "black_list__allowed_clients";
@@ -49,11 +49,11 @@ public class AddressBlackListValidator implements IPBlackListValidator {
                     new WithPoolEngine<Boolean>(connectionPool)
                             .isPrepared()
                             .queryString(String.format("""
-                SELECT COUNT(*) AS result
-                FROM %s.%s
-                WHERE ip = ?
-                AND tag = ?;
-                """, SCHEMA_NAME, FORBIDDEN_CLIENTS_TABLE))
+                                    SELECT COUNT(*) AS result
+                                    FROM %s.%s
+                                    WHERE ip = ?
+                                    AND tag = ?;
+                                    """, SCHEMA_NAME, FORBIDDEN_CLIENTS_TABLE))
                             .addParamAtPosition(1, ip, ParamType.TYPE_STRING)
                             .addParamAtPosition(2, tag, ParamType.TYPE_STRING)
                             .run(resultSet -> {

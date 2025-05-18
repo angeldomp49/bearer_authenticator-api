@@ -61,7 +61,7 @@ public class ApplicationSessionController {
                 var initTime = System.currentTimeMillis();
                 final var result = !controllerValidatorFactory.getRateLimitValidator().hasAttemptsAvailable(rateLimitInformation, RATE_LIMIT_DEFINITION_NAME);
                 var finalTime = System.currentTimeMillis();
-                
+
                 System.out.println("rateLimitValidationFuture time: " + (finalTime - initTime));
                 if (result) {
                     throw new ParallelValidationException(

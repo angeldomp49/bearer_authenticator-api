@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class ApplicationDBConnection {
-    
+
     private static final String DATABASE_NAME = "base_database";
     private static final String SCHEMA_NAME = "atepoztli__authentication_service__schema";
     private static final String APPLICATIONS_TABLE_NAME = "resource__resources";

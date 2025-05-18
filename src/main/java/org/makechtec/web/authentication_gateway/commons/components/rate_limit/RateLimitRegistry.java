@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class RateLimitRegistry {
-    
+
     private static final String SCHEMA = "atepoztli__authentication_service__schema";
     private static final String RATE_LIMITS_TABLE = "rate_limit__rate_limits";
 

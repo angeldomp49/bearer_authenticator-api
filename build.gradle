@@ -60,12 +60,12 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
 }
 
-tasks.register('sqlTests'){
+tasks.register('sqlTests') {
     include("**/sql_tests/**/*.class")
     useJunitPlatform()
 }
 
-tasks.register('integrationTests'){
+tasks.register('integrationTests') {
     include("**/integration/**/*.class")
     useJunitPlatform()
 }

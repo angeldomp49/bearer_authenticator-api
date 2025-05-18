@@ -21,74 +21,62 @@ public class ApplicationLoginFluxTestFixture {
 
     private static final String BASE_URL = "http://localhost:";
     private static final int PORT = 8080;
-    
+    private final TestRestTemplate restTemplate = new TestRestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public String csrfPath;
     public String sessionLoginPath;
     public String sessionCheckPath;
 
-    private final TestRestTemplate restTemplate = new TestRestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    
     public void startServer() {
         SpringApplication.run(AuthApiApplication.class);
     }
 
     public String getCSRFToken(Map<String, String> headersMap) throws JsonProcessingException {
-        
+
         var headers = new HttpHeaders();
-        
+
         headersMap.forEach(headers::set);
-        
+
         var request = new HttpEntity<>("", headers);
-        
+
         return restTemplate.exchange(fullURI(csrfPath), HttpMethod.GET, request, String.class)
                 .getBody();
         
     }
-    
+
     public CSRFResponse csrfResponseFromJson(String jsonString) throws JsonProcessingException {
         var jsonBody = objectMapper.readTree(jsonString);
-        
+
         return new CSRFResponse(
                 jsonBody.get("body").get("data").get("token").asText(),
                 jsonBody.get("statusCode").asInt()
         );
     }
-    
-    public record CSRFResponse(
-            String token,
-            int statusCode
-    ){}
-    
-    public String sessionLogin(Map<String, String> headersMap, MultiValueMap<String, String> requestParamsMap){
+
+    public String sessionLogin(Map<String, String> headersMap, MultiValueMap<String, String> requestParamsMap) {
 
         var headers = new HttpHeaders();
 
         headersMap.forEach(headers::set);
-        
+
 
         var request = new HttpEntity<>(requestParamsMap, headers);
-        
+
         return restTemplate.postForEntity(fullURI(sessionLoginPath), request, String.class)
                 .getBody();
-        
+
     }
-    
+
     public SessionLoginResponse sessionLoginResponseFromJson(String jsonString) throws JsonProcessingException {
         var jsonBody = objectMapper.readTree(jsonString);
-        
+
         return new SessionLoginResponse(
                 jsonBody.get("body").get("data").get("token").asText(),
-                jsonBody.get("statusCode").asInt() 
+                jsonBody.get("statusCode").asInt()
         );
     }
-    
-    public record SessionLoginResponse(
-            String token,
-            int statusCode
-    ){}
 
-    public String sessionCheck(Map<String, String> headersMap){
+    public String sessionCheck(Map<String, String> headersMap) {
 
         var headers = new HttpHeaders();
 
@@ -110,13 +98,8 @@ public class ApplicationLoginFluxTestFixture {
                 jsonBody.get("statusCode").asInt()
         );
     }
-    
-    public record SessionCheckResponse(
-            boolean isValid,
-            int statusCode
-    ){}
-    
-    public URI fullURI(String path){
+
+    public URI fullURI(String path) {
         return URI.create(BASE_URL + PORT + path);
     }
 
@@ -131,5 +114,23 @@ public class ApplicationLoginFluxTestFixture {
     public void setSessionCheckPath(String sessionCheckPath) {
         this.sessionCheckPath = sessionCheckPath;
     }
-    
+
+    public record CSRFResponse(
+            String token,
+            int statusCode
+    ) {
+    }
+
+    public record SessionLoginResponse(
+            String token,
+            int statusCode
+    ) {
+    }
+
+    public record SessionCheckResponse(
+            boolean isValid,
+            int statusCode
+    ) {
+    }
+
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class CommonRateLimitValidator implements RateLimitValidator {
-    
+
     private static final String SCHEMA = "atepoztli__authentication_service__schema";
     private static final String CLIENT_ATTEMPTS_TABLE = "rate_limit__client_attempts";
     private static final String RATE_LIMITS_TABLE = "rate_limit__rate_limits";
@@ -77,7 +77,7 @@ public class CommonRateLimitValidator implements RateLimitValidator {
                         SELECT title, attempts, unit, time_quantity, schema
                         FROM %s.%s
                         WHERE title = ?;
-                        """,SCHEMA, RATE_LIMITS_TABLE))
+                        """, SCHEMA, RATE_LIMITS_TABLE))
                 .addParamAtPosition(1, rateLimitDefinitionName, ParamType.TYPE_STRING)
                 .run(resultSet -> {
                     resultSet.next();

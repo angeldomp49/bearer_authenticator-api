@@ -1,9 +1,7 @@
 package org.makechtec.web.authentication_gateway.commons.components.session;
 
 import org.bouncycastle.util.encoders.Hex;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.ArgonSettings;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.PasswordHasherNative;
-import org.makechtec.bearer_authentication.tools.bearer.stateless.argon.SaltGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.token.JWTTokenGenerator;
 import org.makechtec.bearer_authentication.tools.bearer.stateless.token.SessionInformation;
 import org.makechtec.software.json_tree.ObjectLeaf;
@@ -24,7 +22,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 public class CommonSessionValidator implements ResourceSessionValidator {
-    
+
     private static final String DATABASE_NAME = "base_database";
     private static final String SCHEMA_NAME = "atepoztli__authentication_service__schema";
     private static final String SESSIONS_TABLE = "resource__sessions";
@@ -44,6 +42,33 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         this.connectionPool = connectionPool;
         this.passwordHasher = passwordHasher;
         this.tokenGenerator = tokenGenerator;
+    }
+
+    private static byte[] mergeArrays(byte[] array1, byte[] array2) {
+        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
+        buffer.put(array1);
+        buffer.put(array2);
+        return buffer.array();
+    }
+
+    private static String mergeHashedWithSalt(Optional<ResourceModel> resourceModel) {
+        return new String(
+                Hex.encode(
+                        mergeArrays(
+                                resourceModel.get().hashedSecret(),
+                                resourceModel.get().salt()
+                        )
+                )
+        );
+    }
+
+    private static ObjectLeaf permissionsJson(List<String> permissions) {
+        var permissionsArray = ArrayStringLeafBuilder.builder();
+        permissions.forEach(permissionsArray::add);
+
+        return ObjectLeafBuilder.builder()
+                .put("permissions", permissionsArray.build())
+                .build();
     }
 
     @Override
@@ -86,18 +111,18 @@ public class CommonSessionValidator implements ResourceSessionValidator {
             new WithPoolEngine<Void>(connectionPool)
                     .isPrepared()
                     .queryString(String.format("""
-                            SELECT permission.name, resource.id
-                            FROM %s.%s.%s AS resource
-                                     INNER JOIN %s.%s.%s AS role
-                                                ON role.resource_resource_id = resource.id
-                                     INNER JOIN %s.%s.%s AS role_permission
-                                                ON role_permission.resource_role_id = role.resource_role_id
-                                     INNER JOIN %s.%s.%s AS permission
-                                                ON role_permission.resource_permission_id = permission.id
-                            WHERE resource.access_key = ?;
-                            """, 
-                            DATABASE_NAME, SCHEMA_NAME, RESOURCES_TABLE, 
-                            DATABASE_NAME, SCHEMA_NAME, PIVOT_RESOURCE_ROLE_TABLE, 
+                                    SELECT permission.name, resource.id
+                                    FROM %s.%s.%s AS resource
+                                             INNER JOIN %s.%s.%s AS role
+                                                        ON role.resource_resource_id = resource.id
+                                             INNER JOIN %s.%s.%s AS role_permission
+                                                        ON role_permission.resource_role_id = role.resource_role_id
+                                             INNER JOIN %s.%s.%s AS permission
+                                                        ON role_permission.resource_permission_id = permission.id
+                                    WHERE resource.access_key = ?;
+                                    """,
+                            DATABASE_NAME, SCHEMA_NAME, RESOURCES_TABLE,
+                            DATABASE_NAME, SCHEMA_NAME, PIVOT_RESOURCE_ROLE_TABLE,
                             DATABASE_NAME, SCHEMA_NAME, PIVOT_ROLE_PERMISSION_TABLE,
                             DATABASE_NAME, SCHEMA_NAME, PERMISSIONS_TABLE
                     ))
@@ -112,7 +137,7 @@ public class CommonSessionValidator implements ResourceSessionValidator {
 
             var expirationTime = Calendar.getInstance();
             expirationTime.add(Calendar.DAY_OF_MONTH, SESSION_EXPIRATION_DAYS);
-            
+
             var permissionsString = permissionsJson(permissions).getLeafValue();
 
             var sessionId = new WithPoolEngine<Long>(connectionPool)
@@ -151,7 +176,6 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         }
     }
 
-
     @Override
     public String createJWT(AuthenticatedResourceSession sessionInformation) throws ControllerValidationException {
         var secretHashKey = resourceSecretHashKey(sessionInformation.resourceId());
@@ -183,7 +207,7 @@ public class CommonSessionValidator implements ResourceSessionValidator {
 
     @Override
     public boolean isValidJWTSignature(String token) throws ControllerValidationException {
-        
+
         var id = tokenGenerator.getJWTPayload(token).getLong("resourceId");
         var personalSecretHashKey = resourceSecretHashKey(id);
 
@@ -249,31 +273,4 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         }
     }
 
-    private static byte[] mergeArrays(byte[] array1, byte[] array2) {
-        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
-        buffer.put(array1);
-        buffer.put(array2);
-        return buffer.array();
-    }
-
-    private static String mergeHashedWithSalt(Optional<ResourceModel> resourceModel) {
-        return new String(
-                Hex.encode(
-                        mergeArrays(
-                                resourceModel.get().hashedSecret(),
-                                resourceModel.get().salt()
-                        )
-                )
-        );
-    }
-    
-    private static ObjectLeaf permissionsJson(List<String> permissions) {
-        var permissionsArray = ArrayStringLeafBuilder.builder();
-        permissions.forEach(permissionsArray::add);
-        
-        return ObjectLeafBuilder.builder()
-                .put("permissions", permissionsArray.build())
-                .build();
-    }
-    
 }

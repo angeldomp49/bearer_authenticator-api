@@ -43,7 +43,7 @@ public class ApplicationLifeCycleListener implements ApplicationListener<Applica
         }
 
         cacheSystemTable.putCallback("temporaryApplicationSecretKey", randomStringGenerator::generateTemporarySecretKey);
-        
+
         try {
             this.rateLimitRegistry.registerNewRateLimit(new RateLimitSchema(
                     """

@@ -2,9 +2,9 @@
 
 <html xmlns:c="http://www.concordion.org/2007/concordion">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Login process</title>
-    <link rel="stylesheet" href="LoginFluxTest.css" />
+    <link href="LoginFluxTest.css" rel="stylesheet"/>
 </head>
 <body>
 
@@ -12,25 +12,25 @@
 
 <section>
     <p>First we start the server</p>
-    <span c:execute="startServer()" />
+    <span c:execute="startServer()"/>
 </section>
 
 <section class="csrf-api-call">
     <p>
         We test the full login process first we get one valid fresh CSRF token.
     </p>
-    
+
     <p>We will send the following headers to the csrf path</p>
-    
-    <p c:set="#csrfPath" >/application/csrf</p>
+
+    <p c:set="#csrfPath">/application/csrf</p>
     <p c:execute="setCsrfPath(#csrfPath)"></p>
-    
+
     <table>
         <tbody>
-            <tr>
-                <th>Header name</th>
-                <th>Header value</th>
-            </tr>
+        <tr>
+            <th>Header name</th>
+            <th>Header value</th>
+        </tr>
         <tr>
             <td c:set="#csrfHeaderName">Application-Agent</td>
             <td c:set="#csrfHeaderValue">Auth API Test Agent/1.0</td>
@@ -40,30 +40,30 @@
 
     <p>
         We validate the CSRF response:
-        <span c:execute="#headersMap = new java.util.HashMap()" />
-        <span c:execute="#headersMap.put(#csrfHeaderName, #csrfHeaderValue)" />
-        <span c:execute="#csrfResponse = getCSRFToken(#headersMap)" />
-        <span c:execute="#jsonCsrfResponse = csrfResponseFromJson(#csrfResponse)" />
+        <span c:execute="#headersMap = new java.util.HashMap()"/>
+        <span c:execute="#headersMap.put(#csrfHeaderName, #csrfHeaderValue)"/>
+        <span c:execute="#csrfResponse = getCSRFToken(#headersMap)"/>
+        <span c:execute="#jsonCsrfResponse = csrfResponseFromJson(#csrfResponse)"/>
     </p>
-    
+
     <p c:echo="#csrfResponse"></p>
 
     <table>
         <tbody>
-            <tr>
-                <th>Status code</th>
-                <th>Body</th>
-            </tr>
-            <tr>
-                <td c:assert-equals="#jsonCsrfResponse.statusCode()">200</td>
-                <td c:assert-false="#jsonCsrfResponse.token().isEmpty()">
-                    <span c:echo="#jsonCsrfResponse.token()" />
-                </td>
-    
-            </tr>
+        <tr>
+            <th>Status code</th>
+            <th>Body</th>
+        </tr>
+        <tr>
+            <td c:assert-equals="#jsonCsrfResponse.statusCode()">200</td>
+            <td c:assert-false="#jsonCsrfResponse.token().isEmpty()">
+                <span c:echo="#jsonCsrfResponse.token()"/>
+            </td>
+
+        </tr>
         </tbody>
     </table>
-    
+
 </section>
 
 <section class="login-api-call">
@@ -74,12 +74,12 @@
     <p>
         The headers we will pass are:
     </p>
-    
+
     <p>
         To the login path
     </p>
 
-    <p c:set="#sessionLoginPath" >/application/session/login</p>
+    <p c:set="#sessionLoginPath">/application/session/login</p>
     <p c:execute="setSessionLoginPath(#sessionLoginPath)"></p>
 
     <table>
@@ -96,7 +96,7 @@
             <td c:set="#sessionLoginCsrfHeaderName">Application-X-Csrf-Token</td>
             <td>
                 <span c:execute="#sessionLoginCsrfHeaderValue = #jsonCsrfResponse.token()"></span>
-                <span c:echo="#jsonCsrfResponse.token()" />
+                <span c:echo="#jsonCsrfResponse.token()"/>
             </td>
         </tr>
         </tbody>
@@ -118,32 +118,32 @@
         </tr>
         </tbody>
     </table>
-    
+
     <p>
         We run the session login api call:
-        <span c:execute="#headersMap2 = new java.util.HashMap()" />
-        <span c:execute="#headersMap2.put(#sessionLoginAgentHeaderName, #sessionLoginAgentHeaderValue)" />
-        <span c:execute="#headersMap2.put(#sessionLoginCsrfHeaderName, #sessionLoginCsrfHeaderValue)" />
+        <span c:execute="#headersMap2 = new java.util.HashMap()"/>
+        <span c:execute="#headersMap2.put(#sessionLoginAgentHeaderName, #sessionLoginAgentHeaderValue)"/>
+        <span c:execute="#headersMap2.put(#sessionLoginCsrfHeaderName, #sessionLoginCsrfHeaderValue)"/>
 
-        <p c:echo="#headersMap2" ></p>
+    <p c:echo="#headersMap2"></p>
 
-        <span c:execute="#sessionLoginParams = new org.springframework.util.LinkedMultiValueMap()" />
-        <span c:execute="#sessionLoginParams.add(#sessionLoginAccessKeyName, #sessionLoginAccessKeyValue)" />
-        <span c:execute="#sessionLoginParams.add(#sessionLoginSecretKeyName, #sessionLoginSecretKeyValue)" />
-        
-    
-        <p c:echo="#sessionLoginParams" ></p>
-        
-        <span c:execute="#sessionLoginResponse = sessionLogin(#headersMap2, #sessionLoginParams)" />
-        <span c:execute="#jsonSessionLoginResponse = sessionLoginResponseFromJson(#sessionLoginResponse)" />
-        
+    <span c:execute="#sessionLoginParams = new org.springframework.util.LinkedMultiValueMap()"/>
+    <span c:execute="#sessionLoginParams.add(#sessionLoginAccessKeyName, #sessionLoginAccessKeyValue)"/>
+    <span c:execute="#sessionLoginParams.add(#sessionLoginSecretKeyName, #sessionLoginSecretKeyValue)"/>
+
+
+    <p c:echo="#sessionLoginParams"></p>
+
+    <span c:execute="#sessionLoginResponse = sessionLogin(#headersMap2, #sessionLoginParams)"/>
+    <span c:execute="#jsonSessionLoginResponse = sessionLoginResponseFromJson(#sessionLoginResponse)"/>
+
     </p>
-    
+
     <p>
         Then we validate the response:
     </p>
-    
-    <p><span c:echo="#sessionLoginResponse" /></p>
+
+    <p><span c:echo="#sessionLoginResponse"/></p>
 
     <table>
         <tbody>
@@ -154,20 +154,20 @@
         <tr>
             <td c:assert-equals="#jsonSessionLoginResponse.statusCode">201</td>
             <td c:assert-false="#jsonSessionLoginResponse.token.isEmpty()">
-                <span c:echo="#jsonSessionLoginResponse.token" />
+                <span c:echo="#jsonSessionLoginResponse.token"/>
             </td>
 
         </tr>
         </tbody>
     </table>
-    
+
 </section>
 
 <section class="check-api-call">
     <p>
         We call the application/session/check endpoint to validate the session status
     </p>
-    
+
     <p>
         The headers we will pass are:
     </p>
@@ -176,7 +176,7 @@
         To the check path
     </p>
 
-    <p c:set="#sessionCheckPath" >/application/session/check</p>
+    <p c:set="#sessionCheckPath">/application/session/check</p>
     <p c:execute="setSessionCheckPath(#sessionCheckPath)"></p>
 
     <table>
@@ -189,27 +189,27 @@
             <td c:set="#sessionCheckAuthorizationHeaderName">Application-Authorization</td>
             <td>
                 <span c:execute="#sessionCheckAuthorizationHeaderValue = #jsonSessionLoginResponse.token()"></span>
-                <span c:echo="#jsonSessionLoginResponse.token()" />
+                <span c:echo="#jsonSessionLoginResponse.token()"/>
             </td>
         </tr>
         </tbody>
     </table>
-    
+
     <p>
         We run the session check api call
 
-        <span c:execute="#headersMap3 = new java.util.HashMap()" />
-        <span c:execute="#headersMap3.put(#sessionCheckAuthorizationHeaderName, #sessionCheckAuthorizationHeaderValue)" />
+        <span c:execute="#headersMap3 = new java.util.HashMap()"/>
+        <span c:execute="#headersMap3.put(#sessionCheckAuthorizationHeaderName, #sessionCheckAuthorizationHeaderValue)"/>
 
-        <span c:execute="#sessionCheckResponse = sessionCheck(#headersMap3)" />
-        <span c:execute="#jsonSessionCheckResponse = sessionCheckResponseFromJson(#sessionCheckResponse)" />
+        <span c:execute="#sessionCheckResponse = sessionCheck(#headersMap3)"/>
+        <span c:execute="#jsonSessionCheckResponse = sessionCheckResponseFromJson(#sessionCheckResponse)"/>
     </p>
-    
+
     <p>
         Then we validate the response:
     </p>
 
-    <p><span c:echo="#sessionCheckResponse" /></p>
+    <p><span c:echo="#sessionCheckResponse"/></p>
 
     <table>
         <tbody>
@@ -220,13 +220,13 @@
         <tr>
             <td c:assert-equals="#jsonSessionCheckResponse.statusCode">200</td>
             <td c:assert-true="#jsonSessionCheckResponse.isValid()">
-                <span c:echo="#jsonSessionCheckResponse.isValid()" />
+                <span c:echo="#jsonSessionCheckResponse.isValid()"/>
             </td>
 
         </tr>
         </tbody>
     </table>
-    
+
 </section>
 
 </body>

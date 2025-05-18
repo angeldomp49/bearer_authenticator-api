@@ -137,5 +137,5 @@ public class ServiceProvider {
     public SaltGenerator saltGenerator() {
         return new SaltGenerator();
     }
-    
+
 }
