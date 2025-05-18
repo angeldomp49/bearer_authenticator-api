@@ -51,12 +51,12 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         return buffer.array();
     }
 
-    private static String mergeHashedWithSalt(Optional<ResourceModel> resourceModel) {
+    private static String mergeHashedWithSalt(ResourceModel resourceModel) {
         return new String(
                 Hex.encode(
                         mergeArrays(
-                                resourceModel.get().hashedSecret(),
-                                resourceModel.get().salt()
+                                resourceModel.hashedSecret(),
+                                resourceModel.salt()
                         )
                 )
         );
@@ -76,7 +76,11 @@ public class CommonSessionValidator implements ResourceSessionValidator {
         try {
             var resourceModel = find(accessKey, resourceKind);
 
-            var hashed = mergeHashedWithSalt(resourceModel);
+            if (resourceModel.isEmpty()) {
+                return false;
+            }
+
+            var hashed = mergeHashedWithSalt(resourceModel.get());
             return resourceModel.filter(value -> passwordHasher.matches(secret, hashed))
                     .isPresent();
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {

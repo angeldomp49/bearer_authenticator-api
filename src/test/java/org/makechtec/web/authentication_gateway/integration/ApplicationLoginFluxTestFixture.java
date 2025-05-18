@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import java.net.URI;
 import java.util.Map;
 
+@SuppressWarnings("NewClassNamingConvention")
 @ConcordionFixture
 @FullOGNL
 public class ApplicationLoginFluxTestFixture {
@@ -31,7 +32,7 @@ public class ApplicationLoginFluxTestFixture {
         SpringApplication.run(AuthApiApplication.class);
     }
 
-    public String getCSRFToken(Map<String, String> headersMap) throws JsonProcessingException {
+    public String getCSRFToken(Map<String, String> headersMap) {
 
         var headers = new HttpHeaders();
 
@@ -41,7 +42,7 @@ public class ApplicationLoginFluxTestFixture {
 
         return restTemplate.exchange(fullURI(csrfPath), HttpMethod.GET, request, String.class)
                 .getBody();
-        
+
     }
 
     public CSRFResponse csrfResponseFromJson(String jsonString) throws JsonProcessingException {
